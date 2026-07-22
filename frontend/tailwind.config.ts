@@ -13,7 +13,29 @@ export default {
       },
     },
     extend: {
+      fontFamily: {
+        sans: ["'Plus Jakarta Sans'", "system-ui", "sans-serif"],
+      },
+      fontSize: {
+        display: ["1.75rem", { lineHeight: "2.1rem", fontWeight: "700" }],
+        title: ["1.375rem", { lineHeight: "1.75rem", fontWeight: "700" }],
+        subtitle: ["1.0625rem", { lineHeight: "1.5rem", fontWeight: "600" }],
+        body: ["0.9375rem", { lineHeight: "1.4rem", fontWeight: "400" }],
+        caption: ["0.8125rem", { lineHeight: "1.15rem", fontWeight: "500" }],
+      },
       colors: {
+        success: {
+          DEFAULT: "hsl(var(--success))",
+          foreground: "hsl(var(--success-foreground))",
+        },
+        warning: {
+          DEFAULT: "hsl(var(--warning))",
+          foreground: "hsl(var(--warning-foreground))",
+        },
+        critical: {
+          DEFAULT: "hsl(var(--critical))",
+          foreground: "hsl(var(--critical-foreground))",
+        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Layout } from "./components/Layout";
+import { PhoneFrame } from "./components/PhoneFrame";
 import CheckIn from "./pages/CheckIn";
 import Upload from "./pages/Upload";
 import Summaries from "./pages/Summaries";
@@ -20,17 +21,19 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Layout />}>
-            <Route index element={<CheckIn />} />
-            <Route path="upload" element={<Upload />} />
-            <Route path="summaries" element={<Summaries />} />
-            <Route path="appointments" element={<Appointments />} />
-            <Route path="insurance" element={<Insurance />} />
-          </Route>
-          <Route path="agent-call" element={<AgentCall />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <PhoneFrame>
+          <Routes>
+            <Route path="/" element={<Layout />}>
+              <Route index element={<CheckIn />} />
+              <Route path="upload" element={<Upload />} />
+              <Route path="summaries" element={<Summaries />} />
+              <Route path="appointments" element={<Appointments />} />
+              <Route path="insurance" element={<Insurance />} />
+            </Route>
+            <Route path="agent-call" element={<AgentCall />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </PhoneFrame>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

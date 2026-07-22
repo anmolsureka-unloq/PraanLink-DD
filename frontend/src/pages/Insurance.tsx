@@ -390,65 +390,50 @@ Begin by warmly greeting them and asking about their current insurance status an
 
   return (
     <div className="flex h-full flex-col">
-      {/* Voice Agent Button - Top */}
-      <div className="border-b border-border bg-card px-6 py-6">
-        <div className="flex flex-col items-center gap-4">
+      {/* Voice Agent */}
+      <div className="border-b border-border bg-card px-5 py-5 flex-shrink-0">
+        <div className="flex flex-col items-center gap-3">
           <div className="text-center">
-            <h2 className="text-xl font-bold text-foreground mb-1">
-              Insurance Assistant
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              {isRecording 
-                ? `Consultation in progress - ${formatTime(elapsed)}`
-                : "Tap to speak with your personal insurance advisor"}
+            <h2 className="text-subtitle text-foreground">Insurance assistant</h2>
+            <p className="text-caption text-muted-foreground">
+              {isRecording ? `Consultation in progress - ${formatTime(elapsed)}` : "Tap to speak with your advisor"}
             </p>
           </div>
 
-          {/* Audio Visualizer */}
           <AnimatePresence>
             {isRecording && (
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="flex justify-center gap-1 h-12 items-end mb-2"
+                className="flex h-10 items-end justify-center gap-1"
               >
                 {[...Array(12)].map((_, i) => (
                   <motion.div
                     key={i}
-                    animate={{
-                      height: [
-                        "20%",
-                        `${Math.random() * 80 + 20}%`,
-                        "20%",
-                      ],
-                    }}
-                    transition={{
-                      repeat: Infinity,
-                      duration: 0.8,
-                      delay: i * 0.05,
-                    }}
-                    className="w-1.5 bg-gradient-to-t from-primary to-secondary rounded-full"
+                    animate={{ height: ["20%", `${Math.random() * 80 + 20}%`, "20%"] }}
+                    transition={{ repeat: Infinity, duration: 0.8, delay: i * 0.05 }}
+                    className="w-1.5 rounded-full bg-gradient-to-t from-primary to-secondary"
                   />
                 ))}
               </motion.div>
             )}
           </AnimatePresence>
-          
+
           <Button
             onClick={isRecording ? stopRecording : startRecording}
             disabled={isProcessing}
             size="lg"
-            className={`h-20 w-20 rounded-full ${
+            className={`h-16 w-16 rounded-full ${
               isRecording ? "bg-destructive hover:bg-destructive/90 animate-pulse" : ""
             }`}
           >
             {isProcessing ? (
-              <Loader2 className="h-8 w-8 animate-spin" />
+              <Loader2 className="h-7 w-7 animate-spin" />
             ) : isRecording ? (
-              <Square className="h-8 w-8" />
+              <Square className="h-7 w-7" />
             ) : (
-              <Mic className="h-8 w-8" />
+              <Mic className="h-7 w-7" />
             )}
           </Button>
 
@@ -456,122 +441,91 @@ Begin by warmly greeting them and asking about their current insurance status an
             <motion.div
               animate={{ opacity: [1, 0.5, 1] }}
               transition={{ repeat: Infinity, duration: 1.5 }}
-              className="flex items-center gap-2 text-primary font-medium text-sm"
+              className="flex items-center gap-2 text-caption font-medium text-primary"
             >
-              <div className="w-2 h-2 rounded-full bg-primary" />
+              <div className="h-2 w-2 rounded-full bg-primary" />
               Advisor is speaking...
             </motion.div>
           )}
         </div>
       </div>
 
-      {/* Insurance Plans - Below */}
-      <div className="flex flex-1 flex-col">
-        {/* Header */}
-        <div className="border-b border-border bg-card px-6 py-5">
-          <h2 className="text-xl font-bold text-foreground">
-            Available Plans
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            Talk to our advisor to find the best plan for you
-          </p>
-        </div>
+      {/* Plans */}
+      <div className="flex-1 overflow-auto px-5 py-5">
+        <h2 className="mb-1 text-subtitle text-foreground">Available plans</h2>
+        <p className="mb-4 text-caption text-muted-foreground">Talk to the advisor to find the best fit</p>
 
-        {/* Plans List */}
-        <div className="flex-1 overflow-auto p-6">
-          <div className="space-y-4">
-            {recommendedPlans.map((plan) => (
-              <motion.div
-                key={plan.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3 }}
-              >
-                <Card className="p-5 transition-smooth hover:shadow-md">
-                  <div className="space-y-4">
-                    {/* Header */}
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <Shield className="h-5 w-5 text-primary" />
-                          <h3 className="text-lg font-semibold text-foreground">
-                            {plan.name}
-                          </h3>
-                        </div>
-                        <p className="mt-1 text-sm text-muted-foreground">
-                          {plan.provider}
-                        </p>
-                      </div>
+        <div className="space-y-4">
+          {recommendedPlans.map((plan) => (
+            <motion.div
+              key={plan.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <Card className="p-5 transition-smooth hover:shadow-md">
+                <div className="space-y-4">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <Shield className="h-5 w-5 text-primary" />
+                      <h3 className="text-subtitle text-foreground">{plan.name}</h3>
                     </div>
-
-                    {/* Coverage & Premium */}
-                    <div className="flex gap-4">
-                      <div className="flex-1 rounded-lg bg-primary/10 p-3">
-                        <p className="text-xs text-muted-foreground">Coverage</p>
-                        <p className="mt-1 text-lg font-bold text-primary">
-                          {plan.coverage}
-                        </p>
-                      </div>
-                      <div className="flex-1 rounded-lg bg-muted p-3">
-                        <p className="text-xs text-muted-foreground">Premium</p>
-                        <p className="mt-1 text-lg font-bold text-foreground">
-                          {plan.premium}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Features */}
-                    <div>
-                      <p className="mb-2 text-sm font-medium text-foreground">
-                        Key Features
-                      </p>
-                      <div className="space-y-1.5">
-                        {plan.features.map((feature, idx) => (
-                          <div
-                            key={idx}
-                            className="flex items-start gap-2 text-sm text-muted-foreground"
-                          >
-                            <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
-                            <span>{feature}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Action */}
-                    <Button
-                      className="w-full"
-                      onClick={() => {
-                        toast.success(`Requesting details for ${plan.name}`);
-                      }}
-                    >
-                      Get Quote
-                    </Button>
+                    <p className="mt-1 text-caption text-muted-foreground">{plan.provider}</p>
                   </div>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
 
-          {/* Info Card */}
-          {!isRecording && (
-            <Card className="mt-4 bg-muted/50 p-4">
-              <div className="flex items-start gap-3">
-                <div className="rounded-lg bg-primary/10 p-2">
-                  <Users className="h-5 w-5 text-primary" />
+                  <div className="flex gap-3">
+                    <div className="flex-1 rounded-lg bg-primary/10 p-3">
+                      <p className="text-caption text-muted-foreground">Coverage</p>
+                      <p className="mt-1 text-subtitle text-primary">{plan.coverage}</p>
+                    </div>
+                    <div className="flex-1 rounded-lg bg-muted p-3">
+                      <p className="text-caption text-muted-foreground">Premium</p>
+                      <p className="mt-1 text-subtitle text-foreground">{plan.premium}</p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <p className="mb-2 text-body font-medium text-foreground">Key features</p>
+                    <div className="space-y-1.5">
+                      {plan.features.map((feature, idx) => (
+                        <div key={idx} className="flex items-start gap-2 text-body text-muted-foreground">
+                          <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
+                          <span>{feature}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <Button
+                    className="w-full"
+                    onClick={() => {
+                      toast.success(`Requesting details for ${plan.name}`);
+                    }}
+                  >
+                    Get quote
+                  </Button>
                 </div>
-                <div>
-                  <p className="text-sm font-medium text-foreground">
-                    Need Help Choosing?
-                  </p>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    Talk to our insurance advisor above. They'll ask about your age, family, health situation, and budget to recommend the perfect plan for you.
-                  </p>
-                </div>
-              </div>
-            </Card>
-          )}
+              </Card>
+            </motion.div>
+          ))}
         </div>
+
+        {!isRecording && (
+          <Card className="mt-4 bg-muted/50 p-4">
+            <div className="flex items-start gap-3">
+              <div className="rounded-lg bg-primary/10 p-2">
+                <Users className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <p className="text-body font-medium text-foreground">Need help choosing?</p>
+                <p className="mt-1 text-caption text-muted-foreground">
+                  Talk to the insurance advisor above. They'll ask about your age, family, health situation, and
+                  budget to recommend the perfect plan for you.
+                </p>
+              </div>
+            </div>
+          </Card>
+        )}
       </div>
     </div>
   );

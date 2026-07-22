@@ -62,8 +62,9 @@ PraanLink addresses these challenges through:
 
 ### Frontend
 - **React** + **TypeScript** + **Vite** - Modern, fast development
+- **Mobile-first UI** - Single decorative phone frame on desktop, bottom tab navigation, native-feeling on mobile
 - **Gemini Live API** + **WebSockets** - Real-time, bilingual conversations
-- **shadcn/ui** + **Tailwind CSS** - Beautiful, responsive UI
+- **shadcn/ui** + **Tailwind CSS** + **Framer Motion** - Premium, animated, responsive UI
 - **React Router** - Client-side routing
 - **TanStack Query** - Data fetching and state management
 
@@ -167,108 +168,99 @@ The report generation process follows a **7-step pipeline**:
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Quick Start
 
-### Prerequisites
+The fastest way to get **everything** running — backend, AI pipeline, and frontend — is the one-command setup script at the repo root:
 
-- **Python 3.10+** (for backend and AI pipeline)
-- **Node.js 18+** (for frontend)
-- **PostgreSQL** (for database)
-- **Google Cloud Account** (for Gemini Live API and ADK)
-- **npm** or **bun** (for frontend dependencies)
-
-### Installation
-
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd PraanLink
-   ```
-
-2. **Backend Setup**
-   ```bash
-   cd PraanLink/backend
-   
-   # Create virtual environment
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   
-   # Install dependencies
-   pip install -r requirements.txt
-   
-   # Configure environment
-   cp env.example .env
-   # Edit .env with your DATABASE_URL and API keys
-   
-   # Initialize database (if needed)
-   # The database will be initialized automatically on first run
-   ```
-
-3. **Frontend Setup**
-   ```bash
-   cd PraanLink/frontend
-   
-   # Install dependencies
-   npm install
-   # or
-   bun install
-   
-   # Configure environment (if needed)
-   # Create .env file with VITE_API_URL=http://localhost:8000
-   ```
-
-4. **AI Pipeline Setup**
-   ```bash
-   cd PraanLink/ai-pipeline
-   
-   # Activate the ADK virtual environment
-   source adk-venv/bin/activate  # On Windows: adk-venv\Scripts\activate
-   
-   # Install dependencies (if not already installed)
-   pip install -r requirements.txt
-   ```
-
-### Running the Application
-
-1. **Start the Backend** (Terminal 1)
-   ```bash
-   cd PraanLink/backend
-   python main.py
-   ```
-   Backend runs on `http://localhost:8000`
-   - API Docs: `http://localhost:8000/docs`
-   - Health Check: `http://localhost:8000/health`
-
-2. **Start the Frontend** (Terminal 2)
-   ```bash
-   cd PraanLink/frontend
-   npm run dev
-   # or
-   bun dev
-   ```
-   Frontend runs on `http://localhost:5173` (or port shown in terminal)
-
-3. **Start the AI Pipeline** (Terminal 3)
-   ```bash
-   cd PraanLink/ai-pipeline
-   source adk-venv/bin/activate
-   adk api_server --allow_origins=http://localhost:8000 --host=0.0.0.0 --port=5010
-   ```
-   AI Pipeline runs on `http://localhost:5010`
-
-### Environment Configuration
-
-#### Backend (.env)
-```env
-DATABASE_URL=postgresql://user:password@localhost:5432/praanlink
-GOOGLE_API_KEY=your_google_api_key
+```bash
+git clone <repository-url>
+cd PraanLink
+./start.sh
 ```
 
-#### Frontend (.env)
+**First run**, `start.sh` will (macOS + [Homebrew](https://brew.sh) required):
+- Install Python 3.11 and PostgreSQL 16 if not already present
+- Create the `praanlink` database and role
+- Create both Python virtualenvs (repo-root `venv/` for the backend, `ai-pipeline/adk-venv/` for the AI pipeline) and install all dependencies
+- Install frontend (`npm`) dependencies
+- Prompt you once for a **Gemini API key** (free at [aistudio.google.com/apikey](https://aistudio.google.com/apikey)) and, optionally, a **Hugging Face token** (only needed for check-in/insurance audio transcription — see [huggingface.co/settings/tokens](https://huggingface.co/settings/tokens)), then write `backend/.env`, `ai-pipeline/.env`, and `frontend/.env`
+
+**Every run** (including the first), it starts all three services together and waits for each to become healthy:
+- AI pipeline (Google ADK) — `http://localhost:5010`
+- Backend (FastAPI) — `http://localhost:8000` ([API docs](http://localhost:8000/docs))
+- Frontend (Vite) — `http://localhost:8080`
+
+Press `Ctrl+C` to stop all three. Re-running `./start.sh` any time is safe — it skips whatever's already installed/configured and **never overwrites an existing `.env` file**.
+
+Optional, not required to get started:
+- **Gmail/Calendar (doctor-escalation feature):** needs `backend/credentials.json` — a Google OAuth2 client downloaded from Google Cloud Console — plus a one-time `python utils/google_auth_setup.py` run from `backend/` (with the backend venv activated) to generate `backend/token.json`. Without it, the escalation feature reports itself as unconfigured but everything else works normally.
+- To skip the interactive prompts (e.g. scripted setup), export `GEMINI_API_KEY` and/or `HF_TOKEN` before running `./start.sh`.
+
+> `start.sh` targets macOS + Homebrew (verified). On another platform, follow **Manual Setup** below instead.
+
+### Manual Setup (advanced / non-macOS)
+
+**Prerequisites:** Python 3.11+, Node.js 18+, PostgreSQL, a Gemini API key.
+
+1. **Database**
+   ```bash
+   createdb praanlink   # or create a role/database matching your DATABASE_URL below
+   ```
+
+2. **Backend**
+   ```bash
+   cd backend
+   python3.11 -m venv ../venv        # a shared venv one level up, or your own venv/ here
+   ../venv/bin/pip install -r requirements.txt
+   cp .env.example .env              # then edit DATABASE_URL / GEMINI_API_KEY / HF_TOKEN
+   ../venv/bin/python main.py
+   ```
+   Runs on `http://localhost:8000` — API docs at `/docs`, health check at `/health`.
+
+3. **AI Pipeline** (separate terminal)
+   ```bash
+   cd ai-pipeline
+   python3.11 -m venv adk-venv
+   adk-venv/bin/pip install -r requirements.txt
+   cp .env.example .env               # set GOOGLE_API_KEY to the same Gemini key
+   adk-venv/bin/adk api_server --allow_origins=http://localhost:8080 --host=0.0.0.0 --port=5010
+   ```
+   Runs on `http://localhost:5010`.
+
+4. **Frontend** (separate terminal)
+   ```bash
+   cd frontend
+   npm install
+   cp .env.example .env                # set VITE_GEMINI_API_KEY to the same Gemini key
+   npm run dev
+   ```
+   Runs on `http://localhost:8080`.
+
+#### Environment variables
+
+**`backend/.env`**
+```env
+DATABASE_URL=postgresql://praanlink:praanlink@localhost:5432/praanlink
+GEMINI_API_KEY=your_gemini_api_key
+ADK_SERVER_URL=http://localhost:5010
+HF_TOKEN=your_huggingface_token          # optional — audio transcription only
+GOOGLE_USER_EMAIL=your_sender_gmail_address@gmail.com      # optional — Gmail escalation
+GOOGLE_RECEIVER_EMAIL=default_recipient_email@gmail.com    # optional
+```
+
+**`ai-pipeline/.env`**
+```env
+GOOGLE_GENAI_USE_VERTEXAI=FALSE
+GOOGLE_API_KEY=your_gemini_api_key
+```
+
+**`frontend/.env`**
 ```env
 VITE_API_URL=http://localhost:8000
 VITE_GEMINI_API_KEY=your_gemini_api_key
 ```
+
+All three `GEMINI_API_KEY` / `GOOGLE_API_KEY` / `VITE_GEMINI_API_KEY` values are the same key — get one at [aistudio.google.com/apikey](https://aistudio.google.com/apikey). None of the `.env` files are committed to git — never commit real keys.
 
 ---
 
@@ -276,9 +268,15 @@ VITE_GEMINI_API_KEY=your_gemini_api_key
 
 ```
 PraanLink/
+├── start.sh                 # One-command setup + launch script (see Quick Start)
+├── docs/superpowers/         # Design specs and implementation plans
+│
 ├── frontend/                 # React + TypeScript frontend
 │   ├── src/
 │   │   ├── components/      # Reusable UI components
+│   │   │   ├── PhoneFrame.tsx   # Decorative mobile device frame (desktop only)
+│   │   │   ├── BottomNav.tsx    # Mobile bottom tab navigation
+│   │   │   └── Layout.tsx       # App shell: header + routed content + bottom nav
 │   │   ├── pages/          # Page components
 │   │   │   ├── CheckIn.tsx      # Weekly health check-ins
 │   │   │   ├── Upload.tsx      # Document upload (lab reports, prescriptions)
@@ -304,13 +302,15 @@ PraanLink/
 │   │   ├── reports.py      # Report endpoints
 │   │   ├── hospitals.py    # Hospital endpoints
 │   │   ├── insurances.py   # Insurance endpoints
-│   │   └── appointments.py # Appointment endpoints
+│   │   └── appointments.py # Appointment + Gmail/Calendar escalation endpoints
 │   ├── utils/              # Utility functions
-│   │   ├── transcribe.py   # Audio transcription
+│   │   ├── transcribe.py   # Audio transcription (WhisperX)
 │   │   ├── summarize.py    # Conversation summarization
 │   │   ├── ocr_summary.py  # OCR and document processing
 │   │   ├── overall_report.py # Report generation
-│   │   └── gmail_integration.py # Gmail API integration
+│   │   ├── medical_rag.py  # RAG search over patient medical history
+│   │   ├── gmail_integration.py    # Gmail API integration
+│   │   └── calendar_integration.py # Google Calendar API integration
 │   ├── uploads/            # Uploaded files storage
 │   ├── main.py            # FastAPI application
 │   └── requirements.txt
@@ -366,9 +366,15 @@ PraanLink/
 - `GET /api/hospitals/{id}` - Get hospital by ID
 - `POST /api/hospitals` - Create hospital entry
 
-### Appointments
-- `GET /api/appointments` - Get all appointments
-- `POST /api/appointments` - Create appointment
+### Appointments & Doctor Escalation
+- `GET /appointments/get-patient-context` - Full patient medical context for the calling agent
+- `POST /appointments/get-medical-history` - RAG search over patient medical history
+- `POST /appointments/send-email` - Email the latest report PDF to a doctor
+- `POST /appointments/create-calendar-event` - Create a Google Calendar event for the appointment
+
+### Medical Search
+- `POST /medical-search` - General medical Q&A via Gemini
+- `POST /user-history-search` - RAG search over the patient's own uploaded history
 
 ### File Serving
 - `GET /uploads/{file_path}` - Serve uploaded files (PDFs, images, audio)

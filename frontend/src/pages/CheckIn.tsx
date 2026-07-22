@@ -351,136 +351,110 @@ Begin by warmly greeting the user and asking them how their week has been health
   };
 
   return (
-    <div className="flex h-full flex-col">
-      {/* Header */}
-      <div className="border-b border-border bg-card px-8 py-6">
-        <h1 className="text-3xl font-bold text-foreground">Daily Check-In</h1>
-        <p className="mt-2 text-muted-foreground">
-          Share how you're feeling today. Your voice matters.
-        </p>
-      </div>
+    <div className="px-5 py-6">
+      <div className="mx-auto max-w-md space-y-5">
+        {/* Recording Interface */}
+        <Card className="p-6 shadow-md">
+          <div className="flex flex-col items-center space-y-5">
+            {/* Timer Display */}
+            {isRecording && (
+              <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="text-center">
+                <div className="text-display text-foreground">{formatTime(elapsed)}</div>
+              </motion.div>
+            )}
 
-      {/* Content */}
-      <div className="flex-1 overflow-auto p-8">
-        <div className="mx-auto max-w-3xl space-y-6">
-          {/* Recording Interface */}
-          <Card className="p-8">
-            <div className="flex flex-col items-center space-y-6">
-              {/* Timer Display */}
+            {/* Audio Visualizer */}
+            <AnimatePresence>
               {isRecording && (
                 <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="text-center"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="flex h-14 items-end justify-center gap-1"
                 >
-                  <div className="text-4xl font-bold mb-2">{formatTime(elapsed)}</div>
+                  {[...Array(15)].map((_, i) => (
+                    <motion.div
+                      key={i}
+                      animate={{ height: ["20%", `${Math.random() * 80 + 20}%`, "20%"] }}
+                      transition={{ repeat: Infinity, duration: 0.8, delay: i * 0.05 }}
+                      className="w-1.5 rounded-full bg-gradient-to-t from-primary to-secondary"
+                    />
+                  ))}
                 </motion.div>
               )}
+            </AnimatePresence>
 
-              {/* Audio Visualizer */}
-              <AnimatePresence>
-                {isRecording && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="flex justify-center gap-1 mb-4 h-16 items-end"
+            {/* Mic Button */}
+            <button
+              onClick={isRecording ? handleStopRecording : handleStartRecording}
+              disabled={isProcessing}
+              className={cn(
+                "relative flex h-28 w-28 items-center justify-center rounded-full transition-smooth active:scale-95",
+                isRecording
+                  ? "bg-destructive shadow-lg shadow-destructive/30 animate-pulse"
+                  : "bg-primary shadow-lg shadow-primary/25 hover:scale-105",
+                isProcessing && "cursor-not-allowed opacity-50"
+              )}
+            >
+              {isProcessing ? (
+                <Loader2 className="h-8 w-8 animate-spin text-primary-foreground" />
+              ) : isRecording ? (
+                <Square className="h-8 w-8 text-destructive-foreground" />
+              ) : (
+                <Mic className="h-8 w-8 text-primary-foreground" />
+              )}
+
+              {isRecording && (
+                <span className="absolute -bottom-1 -right-1 flex h-5 w-5">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-destructive opacity-75" />
+                  <span className="relative inline-flex h-5 w-5 rounded-full bg-destructive" />
+                </span>
+              )}
+            </button>
+
+            <div className="text-center">
+              <p className="text-subtitle text-foreground">
+                {isProcessing
+                  ? "Processing your check-in..."
+                  : isRecording
+                  ? "Listening... tap to stop"
+                  : "Tap to start your check-in"}
+              </p>
+              <p className="mt-1 text-caption text-muted-foreground">
+                {isRecording && "Talk naturally with your health assistant"}
+                {isAISpeaking && (
+                  <motion.span
+                    animate={{ opacity: [1, 0.5, 1] }}
+                    transition={{ repeat: Infinity, duration: 1.5 }}
+                    className="mt-2 block font-medium text-primary"
                   >
-                    {[...Array(15)].map((_, i) => (
-                      <motion.div
-                        key={i}
-                        animate={{
-                          height: [
-                            "20%",
-                            `${Math.random() * 80 + 20}%`,
-                            "20%",
-                          ],
-                        }}
-                        transition={{
-                          repeat: Infinity,
-                          duration: 0.8,
-                          delay: i * 0.05,
-                        }}
-                        className="w-2 bg-gradient-to-t from-primary to-secondary rounded-full"
-                      />
-                    ))}
-                  </motion.div>
+                    Assistant is speaking...
+                  </motion.span>
                 )}
-              </AnimatePresence>
+              </p>
+            </div>
+          </div>
+        </Card>
 
-              {/* Mic Button */}
-              <button
-                onClick={isRecording ? handleStopRecording : handleStartRecording}
-                disabled={isProcessing}
-                className={cn(
-                  "relative flex h-32 w-32 items-center justify-center rounded-full transition-all duration-300",
-                  isRecording
-                    ? "bg-destructive shadow-lg shadow-destructive/30 animate-pulse"
-                    : "bg-primary shadow-md hover:shadow-lg hover:scale-105",
-                  isProcessing && "opacity-50 cursor-not-allowed"
-                )}
-              >
-                {isProcessing ? (
-                  <Loader2 className="h-12 w-12 text-primary-foreground animate-spin" />
-                ) : isRecording ? (
-                  <Square className="h-12 w-12 text-destructive-foreground" />
-                ) : (
-                  <Mic className="h-12 w-12 text-primary-foreground" />
-                )}
-                
-                {isRecording && (
-                  <span className="absolute -bottom-2 -right-2 flex h-6 w-6">
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-destructive opacity-75"></span>
-                    <span className="relative inline-flex h-6 w-6 rounded-full bg-destructive"></span>
-                  </span>
-                )}
-              </button>
-
-              <div className="text-center">
-                <p className="text-lg font-medium text-foreground">
-                  {isProcessing
-                    ? "Processing your check-in..."
-                    : isRecording
-                    ? "Listening... Tap to stop"
-                    : "Tap to start your check-in"}
-                </p>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {isRecording && "Talk naturally with your health assistant"}
-                  {isAISpeaking && (
-                    <motion.span
-                      animate={{ opacity: [1, 0.5, 1] }}
-                      transition={{ repeat: Infinity, duration: 1.5 }}
-                      className="block mt-2 text-primary font-medium"
-                    >
-                      Assistant is speaking...
-                    </motion.span>
-                  )}
-                </p>
-              </div>
+        {/* Tips Card */}
+        {!isRecording && (
+          <Card className="p-5 bg-muted/50">
+            <h3 className="mb-3 text-subtitle text-foreground">What we'll talk about</h3>
+            <ul className="space-y-2 text-body text-muted-foreground">
+              <li>• How you've been feeling physically this week</li>
+              <li>• Your sleep quality and energy levels</li>
+              <li>• Any medications or treatments you're following</li>
+              <li>• Your emotional wellbeing and stress levels</li>
+              <li>• Any specific health concerns you'd like to discuss</li>
+            </ul>
+            <div className="mt-4 rounded-xl bg-primary/10 p-3">
+              <p className="text-caption font-medium text-primary">
+                💡 Speak naturally and take your time. The assistant can search medical information and your past
+                records to support you.
+              </p>
             </div>
           </Card>
-
-          {/* Tips Card */}
-          {!isRecording && (
-            <Card className="p-6 bg-muted/50">
-              <h3 className="mb-3 text-lg font-semibold text-foreground">
-                What We'll Talk About
-              </h3>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>• How you've been feeling physically this week</li>
-                <li>• Your sleep quality and energy levels</li>
-                <li>• Any medications or treatments you're following</li>
-                <li>• Your emotional wellbeing and stress levels</li>
-                <li>• Any specific health concerns you'd like to discuss</li>
-              </ul>
-              <div className="mt-4 p-3 rounded-lg bg-primary/10">
-                <p className="text-xs font-medium text-primary">
-                  💡 Tip: Speak naturally and take your time. The assistant will ask follow-up questions and can search medical information and your past records to provide better support.
-                </p>
-              </div>
-            </Card>
-          )}
-        </div>
+        )}
       </div>
     </div>
   );

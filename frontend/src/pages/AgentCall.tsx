@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Phone, PhoneOff, Calendar, Mic, CheckCircle, Square, Loader2 } from "lucide-react";
+import { Phone, PhoneOff, Calendar, Mic, CheckCircle, Square, Loader2, ChevronLeft } from "lucide-react";
 import { toast } from "sonner";
 import { useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -605,11 +605,11 @@ The person you're talking to is the hospital front desk staff. This is a real, l
 
   if (!hospital) {
     return (
-      <div className="flex h-full items-center justify-center">
-        <Card className="p-8">
-          <p className="text-lg text-muted-foreground">No hospital information provided</p>
+      <div className="flex h-full items-center justify-center px-5">
+        <Card className="p-6">
+          <p className="text-body text-muted-foreground">No hospital information provided</p>
           <Button onClick={() => navigate("/appointments")} className="mt-4">
-            Back to Appointments
+            Back to appointments
           </Button>
         </Card>
       </div>
@@ -618,12 +618,12 @@ The person you're talking to is the hospital front desk staff. This is a real, l
 
   if (isLoadingContext) {
     return (
-      <div className="flex h-full items-center justify-center">
-        <Card className="p-8">
+      <div className="flex h-full items-center justify-center px-5">
+        <Card className="p-6">
           <div className="flex flex-col items-center space-y-4">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <p className="text-lg font-medium">Loading patient medical context...</p>
-            <p className="text-sm text-muted-foreground">Preparing agent with your medical data</p>
+            <p className="text-subtitle">Loading patient medical context...</p>
+            <p className="text-caption text-muted-foreground">Preparing agent with your medical data</p>
           </div>
         </Card>
       </div>
@@ -631,167 +631,145 @@ The person you're talking to is the hospital front desk staff. This is a real, l
   }
 
   return (
-    <div className="flex h-full flex-col items-center justify-center p-6 bg-gradient-to-br from-primary-lighter to-secondary/20">
-      <Card className="w-full max-w-3xl p-8">
-        <div className="space-y-6">
-          {/* Header */}
-          <div className="text-center">
-            <h1 className="text-3xl font-bold text-foreground">AI Appointment Agent</h1>
-            <p className="mt-2 text-muted-foreground">
-              {hospital.name} - {hospital.phone}
-            </p>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {hospital.address}
-            </p>
-          </div>
+    <div className="flex h-full flex-col bg-gradient-to-br from-primary-lighter to-secondary/20">
+      <header className="flex h-14 flex-shrink-0 items-center gap-2 border-b border-border bg-card/80 px-2 backdrop-blur">
+        <Button variant="ghost" size="sm" onClick={() => navigate("/appointments")} className="gap-1 px-2">
+          <ChevronLeft className="h-5 w-5" />
+          Back
+        </Button>
+      </header>
 
-          {/* Call Status */}
-          <div className="flex items-center justify-center">
-            <div className={`relative flex h-32 w-32 items-center justify-center rounded-full ${
-              isCallActive ? "bg-primary animate-pulse" : callCompleted ? "bg-green-500" : "bg-muted"
-            }`}>
-              {callCompleted ? (
-                <CheckCircle className="h-16 w-16 text-white" />
+      <div className="flex flex-1 flex-col items-center justify-center overflow-auto px-5 py-6">
+        <Card className="w-full p-6">
+          <div className="space-y-5">
+            <div className="text-center">
+              <h1 className="text-title text-foreground">AI appointment agent</h1>
+              <p className="mt-2 text-body text-muted-foreground">
+                {hospital.name} - {hospital.phone}
+              </p>
+              <p className="mt-1 text-caption text-muted-foreground">{hospital.address}</p>
+            </div>
+
+            <div className="flex items-center justify-center">
+              <div
+                className={`relative flex h-24 w-24 items-center justify-center rounded-full ${
+                  isCallActive ? "bg-primary animate-pulse" : callCompleted ? "bg-success" : "bg-muted"
+                }`}
+              >
+                {callCompleted ? (
+                  <CheckCircle className="h-12 w-12 text-success-foreground" />
+                ) : isCallActive ? (
+                  <>
+                    <Phone className="h-12 w-12 text-primary-foreground" />
+                    <div className="absolute h-full w-full animate-ping rounded-full bg-primary opacity-75" />
+                  </>
+                ) : (
+                  <Phone className="h-12 w-12 text-muted-foreground" />
+                )}
+              </div>
+            </div>
+
+            {isRecording && (
+              <div className="text-center">
+                <div className="text-title">{formatTime(elapsed)}</div>
+              </div>
+            )}
+
+            <AnimatePresence>
+              {isRecording && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="flex h-14 items-end justify-center gap-1"
+                >
+                  {[...Array(15)].map((_, i) => (
+                    <motion.div
+                      key={i}
+                      animate={{ height: ["20%", `${Math.random() * 80 + 20}%`, "20%"] }}
+                      transition={{ repeat: Infinity, duration: 0.8, delay: i * 0.05 }}
+                      className="w-1.5 rounded-full bg-gradient-to-t from-primary to-secondary"
+                    />
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            <div className="text-center">
+              {isProcessing ? (
+                <p className="text-body text-muted-foreground">Processing...</p>
               ) : isCallActive ? (
-                <>
-                  <Phone className="h-16 w-16 text-primary-foreground" />
-                  <div className="absolute h-full w-full animate-ping rounded-full bg-primary opacity-75"></div>
-                </>
+                <p className="text-subtitle text-foreground">
+                  {isAISpeaking && (
+                    <motion.span
+                      animate={{ opacity: [1, 0.5, 1] }}
+                      transition={{ repeat: Infinity, duration: 1.5 }}
+                      className="mb-1 block text-primary"
+                    >
+                      AI agent is speaking...
+                    </motion.span>
+                  )}
+                  Call in progress - talking to hospital staff
+                </p>
+              ) : callCompleted ? (
+                <p className="text-subtitle text-success">Appointment booked successfully!</p>
               ) : (
-                <Phone className="h-16 w-16 text-muted-foreground" />
+                <p className="text-body text-muted-foreground">Ready to start the call</p>
               )}
             </div>
-          </div>
 
-          {/* Timer Display */}
-          {isRecording && (
-                <div className="text-center">
-              <div className="text-2xl font-bold">{formatTime(elapsed)}</div>
-                </div>
-          )}
-
-          {/* Audio Visualizer */}
-          <AnimatePresence>
-            {isRecording && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="flex justify-center gap-1 h-16 items-end"
-              >
-                {[...Array(15)].map((_, i) => (
-                  <motion.div
-                    key={i}
-                    animate={{
-                      height: [
-                        "20%",
-                        `${Math.random() * 80 + 20}%`,
-                        "20%",
-                      ],
-                    }}
-                    transition={{
-                      repeat: Infinity,
-                      duration: 0.8,
-                      delay: i * 0.05,
-                    }}
-                    className="w-2 bg-gradient-to-t from-primary to-secondary rounded-full"
-                  />
-                ))}
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Status Messages */}
-          <div className="text-center">
-            {isProcessing ? (
-              <p className="text-lg text-muted-foreground">Processing...</p>
-            ) : isCallActive ? (
-              <p className="text-lg font-medium text-foreground">
-                {isAISpeaking && (
-                  <motion.span
-                    animate={{ opacity: [1, 0.5, 1] }}
-                    transition={{ repeat: Infinity, duration: 1.5 }}
-                    className="block mt-2 text-primary"
+            <div className="flex gap-3">
+              {!callCompleted ? (
+                <>
+                  <Button
+                    onClick={isCallActive ? handleEndCall : handleStartCall}
+                    disabled={isProcessing}
+                    className="flex-1"
+                    size="lg"
+                    variant={isCallActive ? "destructive" : "default"}
                   >
-                    AI Agent is speaking...
-                  </motion.span>
-                )}
-                Call in progress - AI agent is talking to hospital staff
-              </p>
-            ) : callCompleted ? (
-              <p className="text-lg font-medium text-green-600">
-                Appointment booked successfully!
-              </p>
-            ) : (
-              <p className="text-lg text-muted-foreground">
-                Ready to start the call
-              </p>
+                    {isProcessing ? (
+                      <>
+                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                        Processing...
+                      </>
+                    ) : isCallActive ? (
+                      <>
+                        <PhoneOff className="mr-2 h-5 w-5" />
+                        End call
+                      </>
+                    ) : (
+                      <>
+                        <Phone className="mr-2 h-5 w-5" />
+                        Start call
+                      </>
+                    )}
+                  </Button>
+                  <Button onClick={() => navigate("/appointments")} variant="outline" size="lg">
+                    Cancel
+                  </Button>
+                </>
+              ) : (
+                <Button onClick={() => navigate("/appointments")} className="flex-1" size="lg">
+                  Back to appointments
+                </Button>
+              )}
+            </div>
+
+            {!isCallActive && !callCompleted && (
+              <Card className="p-5 bg-muted/50">
+                <h3 className="mb-3 text-subtitle text-foreground">What the AI agent will do</h3>
+                <ul className="space-y-2 text-body text-muted-foreground">
+                  <li>• Review your medical history (check-ins, prescriptions, reports)</li>
+                  <li>• Call the hospital on your behalf</li>
+                  <li>• Discuss your medical needs and find the best appointment time</li>
+                  <li>• Send medical reports via email once appointment is confirmed</li>
+                </ul>
+              </Card>
             )}
           </div>
-
-          {/* Actions */}
-          <div className="flex gap-4">
-            {!callCompleted ? (
-              <>
-                <Button
-                  onClick={isCallActive ? handleEndCall : handleStartCall}
-                  disabled={isProcessing}
-                  className="flex-1"
-                  size="lg"
-                  variant={isCallActive ? "destructive" : "default"}
-                >
-                  {isProcessing ? (
-                    <>
-                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                      Processing...
-                    </>
-                  ) : isCallActive ? (
-                    <>
-                      <PhoneOff className="mr-2 h-5 w-5" />
-                      End Call
-                    </>
-                  ) : (
-                    <>
-                  <Phone className="mr-2 h-5 w-5" />
-                      Start Call
-                    </>
-                  )}
-                </Button>
-                <Button
-                  onClick={() => navigate("/appointments")}
-                  variant="outline"
-                  size="lg"
-                >
-                  Cancel
-                </Button>
-              </>
-            ) : (
-                <Button
-                onClick={() => navigate("/appointments")}
-                  className="flex-1"
-                  size="lg"
-                >
-                  Back to Appointments
-                </Button>
-            )}
-          </div>
-
-          {/* Info Card */}
-          {!isCallActive && !callCompleted && (
-            <Card className="p-6 bg-muted/50">
-              <h3 className="mb-3 text-lg font-semibold text-foreground">
-                What the AI Agent Will Do
-              </h3>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>• Review your medical history (check-ins, prescriptions, reports)</li>
-                <li>• Call the hospital on your behalf</li>
-                <li>• Discuss your medical needs and find the best appointment time</li>
-                <li>• Send medical reports via email once appointment is confirmed</li>
-              </ul>
-            </Card>
-          )}
-        </div>
-      </Card>
+        </Card>
+      </div>
     </div>
   );
 }

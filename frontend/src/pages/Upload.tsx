@@ -5,13 +5,13 @@ import { Upload, File, X, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
 
 interface UploadedFile {
   id: string;
@@ -121,168 +121,146 @@ export default function UploadComponent() {
   };
 
   return (
-    <div className="flex h-screen flex-col">
-      <Dialog open={showClassificationDialog} onOpenChange={setShowClassificationDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Classify Document</DialogTitle>
-            <DialogDescription>
-              Please select the type of document you're uploading
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex flex-col gap-3 py-4">
+    <div className="px-5 py-6">
+      <Drawer open={showClassificationDialog} onOpenChange={setShowClassificationDialog}>
+        <DrawerContent>
+          <DrawerHeader>
+            <DrawerTitle>Classify document</DrawerTitle>
+            <DrawerDescription>Please select the type of document you're uploading</DrawerDescription>
+          </DrawerHeader>
+          <div className="flex flex-col gap-3 px-4 pb-2">
             <Button
-              className="w-full justify-start h-auto py-4"
+              className="h-auto w-full justify-start py-4"
               variant="outline"
               onClick={() => handleClassification("prescription")}
             >
               <div className="text-left">
-                <div className="font-semibold">Prescription</div>
-                <div className="text-sm text-muted-foreground">
+                <div className="text-subtitle">Prescription</div>
+                <div className="text-caption text-muted-foreground">
                   Doctor's prescription with medications and dosage
                 </div>
               </div>
             </Button>
             <Button
-              className="w-full justify-start h-auto py-4"
+              className="h-auto w-full justify-start py-4"
               variant="outline"
               onClick={() => handleClassification("lab_report")}
             >
               <div className="text-left">
-                <div className="font-semibold">Lab Report</div>
-                <div className="text-sm text-muted-foreground">
+                <div className="text-subtitle">Lab report</div>
+                <div className="text-caption text-muted-foreground">
                   Blood test, lipid profile, or other lab results
                 </div>
               </div>
             </Button>
           </div>
-          <DialogFooter>
-            <Button variant="ghost" onClick={() => {
-              setShowClassificationDialog(false);
-              setPendingFile(null);
-            }}>
+          <DrawerFooter>
+            <Button
+              variant="ghost"
+              onClick={() => {
+                setShowClassificationDialog(false);
+                setPendingFile(null);
+              }}
+            >
               Cancel
             </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
 
-      <div className="border-b border-border bg-card px-8 py-6">
-        <h1 className="text-3xl font-bold text-foreground">Upload Reports</h1>
-        <p className="mt-2 text-muted-foreground">
-          Upload your lab reports, prescriptions, or medical documents
-        </p>
-      </div>
-
-      <div className="flex-1 overflow-auto p-8">
-        <div className="mx-auto max-w-4xl space-y-6">
-          <Card
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-            className={cn(
-              "relative cursor-pointer border-2 border-dashed p-12 transition-all",
-              isDragging
-                ? "border-primary bg-primary/10"
-                : "border-border hover:border-primary/50 hover:bg-muted/50",
-              isProcessing && "opacity-50 pointer-events-none"
-            )}
-          >
-            <input
-              type="file"
-              multiple={false}
-              accept=".pdf,.jpg,.jpeg,.png"
-              onChange={handleFileInput}
-              className="absolute inset-0 cursor-pointer opacity-0"
-              disabled={isProcessing}
-            />
-            <div className="flex flex-col items-center text-center">
-              <div className="rounded-full bg-primary/10 p-6">
-                <Upload className="h-10 w-10 text-primary" />
-              </div>
-              <h3 className="mt-4 text-lg font-semibold text-foreground">
-                {isProcessing ? "Processing..." : "Drop files here or click to upload"}
-              </h3>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Supports PDF, JPG, PNG up to 10MB each
-              </p>
-              {!isProcessing && (
-                <Button className="mt-6" variant="default">
-                  Choose Files
-                </Button>
-              )}
+      <div className="space-y-5">
+        <Card
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+          className={cn(
+            "relative cursor-pointer border-2 border-dashed p-8 transition-smooth",
+            isDragging
+              ? "border-primary bg-primary/10"
+              : "border-border hover:border-primary/50 hover:bg-muted/50",
+            isProcessing && "pointer-events-none opacity-50"
+          )}
+        >
+          <input
+            type="file"
+            multiple={false}
+            accept=".pdf,.jpg,.jpeg,.png"
+            onChange={handleFileInput}
+            className="absolute inset-0 cursor-pointer opacity-0"
+            disabled={isProcessing}
+          />
+          <div className="flex flex-col items-center text-center">
+            <div className="rounded-full bg-primary/10 p-5">
+              <Upload className="h-8 w-8 text-primary" />
             </div>
-          </Card>
+            <h3 className="mt-4 text-subtitle text-foreground">
+              {isProcessing ? "Processing..." : "Drop a file or tap to upload"}
+            </h3>
+            <p className="mt-2 text-caption text-muted-foreground">Supports PDF, JPG, PNG up to 10MB</p>
+            {!isProcessing && (
+              <Button className="mt-5" variant="default">
+                Choose file
+              </Button>
+            )}
+          </div>
+        </Card>
 
-          {files.length > 0 && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-foreground">
-                  Uploaded Files ({files.length})
-                </h3>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    setFiles([]);
-                    toast.info("All files cleared");
-                  }}
-                >
-                  Clear All
-                </Button>
-              </div>
+        {files.length > 0 && (
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h3 className="text-subtitle text-foreground">Uploaded ({files.length})</h3>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setFiles([]);
+                  toast.info("All files cleared");
+                }}
+              >
+                Clear all
+              </Button>
+            </div>
 
-              <div className="space-y-3">
-                {files.map((file) => (
-                  <Card
-                    key={file.id}
-                    className="p-4 transition-all hover:shadow-md"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="rounded-lg bg-primary/10 p-2">
-                          <File className="h-5 w-5 text-primary" />
-                        </div>
-                        <div>
-                          <p className="font-medium text-foreground">
-                            {file.name}
-                          </p>
-                          <p className="text-sm text-muted-foreground">
-                            {formatFileSize(file.size)} • {file.type === "prescription" ? "Prescription" : "Lab Report"}
-                          </p>
-                        </div>
+            <div className="space-y-3">
+              {files.map((file) => (
+                <Card key={file.id} className="p-4 transition-smooth hover:shadow-md">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="rounded-lg bg-primary/10 p-2">
+                        <File className="h-5 w-5 text-primary" />
                       </div>
-                      <div className="flex items-center gap-2">
-                        <CheckCircle2 className="h-5 w-5 text-primary" />
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => removeFile(file.id)}
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
+                      <div>
+                        <p className="text-body font-medium text-foreground">{file.name}</p>
+                        <p className="text-caption text-muted-foreground">
+                          {formatFileSize(file.size)} •{" "}
+                          {file.type === "prescription" ? "Prescription" : "Lab report"}
+                        </p>
                       </div>
                     </div>
-                  </Card>
-                ))}
-              </div>
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="h-5 w-5 text-primary" />
+                      <Button variant="ghost" size="sm" onClick={() => removeFile(file.id)}>
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </Card>
+              ))}
             </div>
-          )}
+          </div>
+        )}
 
-          {files.length === 0 && (
-            <Card className="p-6 bg-muted/50">
-              <h3 className="mb-3 text-lg font-semibold text-foreground">
-                What can you upload?
-              </h3>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>• Blood test results and lab reports</li>
-                <li>• X-rays, MRIs, and scan images</li>
-                <li>• Prescriptions and medication lists</li>
-                <li>• Doctor's notes and consultation summaries</li>
-              </ul>
-            </Card>
-          )}
-        </div>
+        {files.length === 0 && (
+          <Card className="p-5 bg-muted/50">
+            <h3 className="mb-3 text-subtitle text-foreground">What can you upload?</h3>
+            <ul className="space-y-2 text-body text-muted-foreground">
+              <li>• Blood test results and lab reports</li>
+              <li>• X-rays, MRIs, and scan images</li>
+              <li>• Prescriptions and medication lists</li>
+              <li>• Doctor's notes and consultation summaries</li>
+            </ul>
+          </Card>
+        )}
       </div>
     </div>
   );

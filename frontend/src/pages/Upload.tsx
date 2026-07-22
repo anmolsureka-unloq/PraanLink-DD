@@ -79,9 +79,10 @@ export default function UploadComponent() {
       const formData = new FormData();
       formData.append("file", pendingFile.file);
 
-      const endpoint = classificationType === "prescription" 
-        ? "http://localhost:8000/upload-prescription"
-        : "http://localhost:8000/upload-lab-report";
+      const BACKEND_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      const endpoint = classificationType === "prescription"
+        ? `${BACKEND_URL}/upload-prescription`
+        : `${BACKEND_URL}/upload-lab-report`;
 
       const response = await fetch(endpoint, {
         method: "POST",

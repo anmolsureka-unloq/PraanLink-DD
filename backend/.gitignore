@@ -1,2 +1,13 @@
 venv/
 .env
+.env.*
+!.env.example
+
+# Google OAuth2 secrets (real credentials must never be committed)
+credentials.json
+token.json
+
+uploads/*
+!uploads/.gitkeep
+__pycache__/
+*.pyc

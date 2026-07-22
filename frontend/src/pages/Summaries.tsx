@@ -89,7 +89,7 @@ export default function Summaries() {
   const [pdfPath, setPdfPath] = useState<string | null>(null);
   const [reportId, setReportId] = useState<number | null>(null);
 
-  const BACKEND_URL = 'http://localhost:8000';
+  const BACKEND_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
   const fetchLatestOverallReport = async () => {
     try {

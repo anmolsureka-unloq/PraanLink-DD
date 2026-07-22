@@ -185,19 +185,20 @@ def create_calendar_event(event_data: Dict[str, Any] = Body(...)):
     """
     Create calendar event via Google Calendar API.
     """
+    import os
+
+    title = event_data.get("title", "")
+    description = event_data.get("description", "")
+    start_time = event_data.get("start_time", "")
+    end_time = event_data.get("end_time", "")
+    location = event_data.get("location", "")
+    # Add default receiver email to attendees if not provided
+    default_attendees = [os.getenv("GOOGLE_RECEIVER_EMAIL", "arnav.prasad999918@gmail.com")]
+    attendees = event_data.get("attendees", default_attendees)
+
     try:
         from utils.calendar_integration import create_calendar_event as create_event
-        import os
-        
-        title = event_data.get("title", "")
-        description = event_data.get("description", "")
-        start_time = event_data.get("start_time", "")
-        end_time = event_data.get("end_time", "")
-        location = event_data.get("location", "")
-        # Add default receiver email to attendees if not provided
-        default_attendees = [os.getenv("GOOGLE_RECEIVER_EMAIL", "arnav.prasad999918@gmail.com")]
-        attendees = event_data.get("attendees", default_attendees)
-        
+
         result = create_event(
             title=title,
             description=description,

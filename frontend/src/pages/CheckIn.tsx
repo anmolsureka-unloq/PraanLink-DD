@@ -26,12 +26,10 @@ export default function CheckIn() {
   const audioContextRef = useRef<AudioContext | null>(null);
   const initializedRef = useRef(false);
 
-  // Replace with your actual API key
-  const API_KEY = 'AIzaSyBOZvLU8kGhhY_d7dVeO63bucV1RNKJbVU';
+  const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
   const endpoint = `wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContent?key=${API_KEY}`;
 
-  // Replace with your backend URL
-  const BACKEND_URL = 'http://localhost:8000';
+  const BACKEND_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
   // Timer effect
   useEffect(() => {

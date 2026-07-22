@@ -1,20 +1,32 @@
 import subprocess
 import json
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 def transcribe_audio(file_path: str, output_dir: str = "uploads/transcripts"):
     """
     Transcribe audio using WhisperX CLI with diarization and remove 'words' & 'word_segments' fields from the result.
-    
+
     Args:
         file_path: Path to the audio file
         output_dir: Directory where WhisperX will save the output
-    
+
     Returns:
         dict: Parsed transcript with diarization data (without 'words' or 'word_segments')
     """
     print("transcribe called")
     os.makedirs(output_dir, exist_ok=True)
+
+    hf_token = os.getenv("HF_TOKEN")
+    if not hf_token:
+        raise ValueError(
+            "Missing HF_TOKEN in .env file. Diarization requires a Hugging Face access "
+            "token with access to the gated pyannote/speaker-diarization-3.0 and "
+            "pyannote/segmentation-3.0 models (accept their terms at huggingface.co, "
+            "then create a token at huggingface.co/settings/tokens)."
+        )
 
     cmd = [
         "whisperx",
@@ -27,6 +39,7 @@ def transcribe_audio(file_path: str, output_dir: str = "uploads/transcripts"):
         "--compute_type", "int8",
         "--diarize_model", "pyannote/speaker-diarization-3.0",
         "--max_speakers", "2",
+        "--hf_token", hf_token,
     ]
 
     try:

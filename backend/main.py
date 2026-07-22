@@ -16,6 +16,9 @@ from utils.transcribe import transcribe_audio
 from utils.summarize import summarize_checkin_text
 from utils.ocr_summary import process_prescription, process_lab_report
 from utils.overall_report import process_overall_report
+from utils.medical_rag import search_medical_data
+import google.generativeai as genai
+from pydantic import BaseModel
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -409,6 +412,48 @@ async def upload_insurance_consultation(
                 "error": "Processing failed",
                 "message": str(e)
             }
+        )
+
+
+class SearchQuery(BaseModel):
+    query: str
+
+
+# General medical knowledge search endpoint (used by the live check-in agent's
+# searchMedicalKnowledge tool call for symptom/condition/medication questions)
+@app.post("/medical-search")
+async def medical_search(payload: SearchQuery):
+    try:
+        model = genai.GenerativeModel(model_name="gemini-2.5-flash")
+        prompt = (
+            "You are a medical information assistant. Answer the following health-related "
+            "question with clear, accurate, general medical knowledge in 3-5 sentences. "
+            "Do not provide a diagnosis; recommend consulting a doctor for anything serious.\n\n"
+            f"Question: {payload.query}"
+        )
+        response = model.generate_content(prompt)
+        answer = getattr(response, "text", None) or "No information found."
+        return {"success": True, "answer": answer}
+    except Exception as e:
+        print(f"Error in medical_search: {str(e)}")
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "answer": "Unable to search medical knowledge at this time.", "error": str(e)}
+        )
+
+
+# Patient history RAG search endpoint (used by the live check-in agent's
+# searchUserHistory tool call over check-ins, prescriptions, and lab reports)
+@app.post("/user-history-search")
+async def user_history_search(payload: SearchQuery, db: Session = Depends(get_db)):
+    try:
+        answer = search_medical_data(payload.query, db=db)
+        return {"success": True, "answer": answer}
+    except Exception as e:
+        print(f"Error in user_history_search: {str(e)}")
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "answer": "Unable to search user history at this time.", "error": str(e)}
         )
 
 

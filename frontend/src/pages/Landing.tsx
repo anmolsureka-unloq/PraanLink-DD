@@ -4,6 +4,8 @@ import { ProblemSection } from "@/components/landing/ProblemSection";
 import { SolutionSection } from "@/components/landing/SolutionSection";
 import { FeaturesSection } from "@/components/landing/FeaturesSection";
 import { WorkflowSection } from "@/components/landing/WorkflowSection";
+import { CtaSection } from "@/components/landing/CtaSection";
+import { LandingFooter } from "@/components/landing/LandingFooter";
 
 export default function Landing() {
   return (
@@ -14,6 +16,8 @@ export default function Landing() {
         <SolutionSection />
         <FeaturesSection />
         <WorkflowSection />
+        <CtaSection />
+        <LandingFooter />
       </div>
     </MotionConfig>
   );

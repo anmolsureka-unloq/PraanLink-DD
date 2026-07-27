@@ -2,6 +2,7 @@ import { MotionConfig } from "framer-motion";
 import { Hero } from "@/components/landing/Hero";
 import { ProblemSection } from "@/components/landing/ProblemSection";
 import { SolutionSection } from "@/components/landing/SolutionSection";
+import { FeaturesSection } from "@/components/landing/FeaturesSection";
 
 export default function Landing() {
   return (
@@ -10,6 +11,7 @@ export default function Landing() {
         <Hero />
         <ProblemSection />
         <SolutionSection />
+        <FeaturesSection />
       </div>
     </MotionConfig>
   );

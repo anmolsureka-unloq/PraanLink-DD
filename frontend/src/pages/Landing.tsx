@@ -3,6 +3,7 @@ import { Hero } from "@/components/landing/Hero";
 import { ProblemSection } from "@/components/landing/ProblemSection";
 import { SolutionSection } from "@/components/landing/SolutionSection";
 import { FeaturesSection } from "@/components/landing/FeaturesSection";
+import { WorkflowSection } from "@/components/landing/WorkflowSection";
 
 export default function Landing() {
   return (
@@ -12,6 +13,7 @@ export default function Landing() {
         <ProblemSection />
         <SolutionSection />
         <FeaturesSection />
+        <WorkflowSection />
       </div>
     </MotionConfig>
   );

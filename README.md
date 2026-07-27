@@ -188,7 +188,7 @@ cd PraanLink
 **Every run** (including the first), it starts all three services together and waits for each to become healthy:
 - AI pipeline (Google ADK) — `http://localhost:5010`
 - Backend (FastAPI) — `http://localhost:8000` ([API docs](http://localhost:8000/docs))
-- Frontend (Vite) — `http://localhost:8080`
+- Frontend (Vite) — `http://localhost:8080` (marketing landing page; the app itself is at `/app`)
 
 Press `Ctrl+C` to stop all three. Re-running `./start.sh` any time is safe — it skips whatever's already installed/configured and **never overwrites an existing `.env` file**.
 

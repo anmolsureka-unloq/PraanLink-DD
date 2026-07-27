@@ -6,7 +6,7 @@ const steps = [
   {
     icon: MessageCircle,
     title: "Check in",
-    body: "A quick, human conversation — however often you need it.",
+    body: "A quick, human conversation — every week, on your schedule.",
   },
   {
     icon: Eye,

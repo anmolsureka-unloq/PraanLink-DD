@@ -5,7 +5,7 @@ const steps = [
   {
     icon: Eye,
     title: "Notice",
-    body: "We check in regularly, in conversation, and quietly track what changes.",
+    body: "We check in weekly, in conversation, and quietly track what changes.",
   },
   {
     icon: Lightbulb,

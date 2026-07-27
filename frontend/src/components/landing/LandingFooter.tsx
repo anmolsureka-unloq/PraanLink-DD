@@ -26,8 +26,12 @@ export const LandingFooter = () => {
           ))}
         </nav>
 
-        <p className="text-xs text-muted-foreground">© 2026 PraanLink</p>
+        <p className="text-xs text-muted-foreground">© 2026 praanLink</p>
       </div>
+
+      <p className="mx-auto mt-8 max-w-6xl text-center text-xs text-muted-foreground">
+        PraanLink supports your health journey and does not replace professional medical advice.
+      </p>
     </footer>
   );
 };

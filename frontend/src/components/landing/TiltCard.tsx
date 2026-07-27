@@ -1,5 +1,5 @@
 import { type MouseEvent, type ReactNode } from "react";
-import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
+import { motion, useMotionValue, useReducedMotion, useSpring, useTransform } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 interface TiltCardProps {
@@ -10,6 +10,7 @@ interface TiltCardProps {
 export const TiltCard = ({ children, className }: TiltCardProps) => {
   const x = useMotionValue(0);
   const y = useMotionValue(0);
+  const prefersReducedMotion = useReducedMotion();
 
   const rotateX = useSpring(useTransform(y, [-0.5, 0.5], [8, -8]), { stiffness: 200, damping: 20 });
   const rotateY = useSpring(useTransform(x, [-0.5, 0.5], [-8, 8]), { stiffness: 200, damping: 20 });
@@ -25,9 +26,19 @@ export const TiltCard = ({ children, className }: TiltCardProps) => {
     y.set(0);
   };
 
+  if (prefersReducedMotion) {
+    return <div className={cn("h-full", className)}>{children}</div>;
+  }
+
   return (
-    <div className={cn("[perspective:1000px]", className)} onMouseMove={handleMouseMove} onMouseLeave={handleMouseLeave}>
-      <motion.div style={{ rotateX, rotateY }}>{children}</motion.div>
+    <div
+      className={cn("h-full [perspective:1000px]", className)}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+    >
+      <motion.div className="h-full" style={{ rotateX, rotateY }}>
+        {children}
+      </motion.div>
     </div>
   );
 };

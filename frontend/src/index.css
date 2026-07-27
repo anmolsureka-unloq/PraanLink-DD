@@ -124,6 +124,10 @@ All colors MUST be HSL.
   body {
     @apply bg-background text-foreground;
   }
+
+  html {
+    scroll-behavior: smooth;
+  }
 }
 
 @layer components {
@@ -228,5 +232,9 @@ All colors MUST be HSL.
 @media (prefers-reduced-motion: reduce) {
   .landing-orb {
     animation: none;
+  }
+
+  html {
+    scroll-behavior: auto;
   }
 }

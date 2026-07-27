@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Layout } from "./components/Layout";
 import { PhoneFrame } from "./components/PhoneFrame";
+import Landing from "./pages/Landing";
 import CheckIn from "./pages/CheckIn";
 import Upload from "./pages/Upload";
 import Summaries from "./pages/Summaries";
@@ -21,19 +22,32 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <PhoneFrame>
-          <Routes>
-            <Route path="/" element={<Layout />}>
-              <Route index element={<CheckIn />} />
-              <Route path="upload" element={<Upload />} />
-              <Route path="summaries" element={<Summaries />} />
-              <Route path="appointments" element={<Appointments />} />
-              <Route path="insurance" element={<Insurance />} />
-            </Route>
-            <Route path="agent-call" element={<AgentCall />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </PhoneFrame>
+        <Routes>
+          <Route path="/" element={<Landing />} />
+          <Route
+            path="/app"
+            element={
+              <PhoneFrame>
+                <Layout />
+              </PhoneFrame>
+            }
+          >
+            <Route index element={<CheckIn />} />
+            <Route path="upload" element={<Upload />} />
+            <Route path="summaries" element={<Summaries />} />
+            <Route path="appointments" element={<Appointments />} />
+            <Route path="insurance" element={<Insurance />} />
+          </Route>
+          <Route
+            path="/app/agent-call"
+            element={
+              <PhoneFrame>
+                <AgentCall />
+              </PhoneFrame>
+            }
+          />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

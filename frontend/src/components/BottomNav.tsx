@@ -4,11 +4,11 @@ import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 export const navigation = [
-  { name: "Check-In", href: "/", icon: MessageSquare },
-  { name: "Upload", href: "/upload", icon: Upload },
-  { name: "Summaries", href: "/summaries", icon: FileText },
-  { name: "Appointments", href: "/appointments", icon: Calendar },
-  { name: "Insurance", href: "/insurance", icon: Shield },
+  { name: "Check-In", href: "/app", icon: MessageSquare },
+  { name: "Upload", href: "/app/upload", icon: Upload },
+  { name: "Summaries", href: "/app/summaries", icon: FileText },
+  { name: "Appointments", href: "/app/appointments", icon: Calendar },
+  { name: "Insurance", href: "/app/insurance", icon: Shield },
 ];
 
 export const BottomNav = () => {
@@ -21,13 +21,13 @@ export const BottomNav = () => {
     >
       {navigation.map((item) => {
         const isActive =
-          item.href === "/" ? location.pathname === "/" : location.pathname.startsWith(item.href);
+          item.href === "/app" ? location.pathname === "/app" : location.pathname.startsWith(item.href);
 
         return (
           <NavLink
             key={item.name}
             to={item.href}
-            end={item.href === "/"}
+            end={item.href === "/app"}
             className="relative flex flex-1 flex-col items-center gap-1 py-1 text-caption"
           >
             {isActive && (

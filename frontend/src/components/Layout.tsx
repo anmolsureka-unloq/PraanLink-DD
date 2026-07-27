@@ -6,7 +6,7 @@ import { BottomNav, navigation } from "./BottomNav";
 export const Layout = () => {
   const location = useLocation();
   const current = navigation.find((item) =>
-    item.href === "/" ? location.pathname === "/" : location.pathname.startsWith(item.href)
+    item.href === "/app" ? location.pathname === "/app" : location.pathname.startsWith(item.href)
   );
 
   return (

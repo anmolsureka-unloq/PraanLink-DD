@@ -608,7 +608,7 @@ The person you're talking to is the hospital front desk staff. This is a real, l
       <div className="flex h-full items-center justify-center px-5">
         <Card className="p-6">
           <p className="text-body text-muted-foreground">No hospital information provided</p>
-          <Button onClick={() => navigate("/appointments")} className="mt-4">
+          <Button onClick={() => navigate("/app/appointments")} className="mt-4">
             Back to appointments
           </Button>
         </Card>
@@ -633,7 +633,7 @@ The person you're talking to is the hospital front desk staff. This is a real, l
   return (
     <div className="flex h-full flex-col bg-gradient-to-br from-primary-lighter to-secondary/20">
       <header className="flex h-14 flex-shrink-0 items-center gap-2 border-b border-border bg-card/80 px-2 backdrop-blur">
-        <Button variant="ghost" size="sm" onClick={() => navigate("/appointments")} className="gap-1 px-2">
+        <Button variant="ghost" size="sm" onClick={() => navigate("/app/appointments")} className="gap-1 px-2">
           <ChevronLeft className="h-5 w-5" />
           Back
         </Button>
@@ -745,12 +745,12 @@ The person you're talking to is the hospital front desk staff. This is a real, l
                       </>
                     )}
                   </Button>
-                  <Button onClick={() => navigate("/appointments")} variant="outline" size="lg">
+                  <Button onClick={() => navigate("/app/appointments")} variant="outline" size="lg">
                     Cancel
                   </Button>
                 </>
               ) : (
-                <Button onClick={() => navigate("/appointments")} className="flex-1" size="lg">
+                <Button onClick={() => navigate("/app/appointments")} className="flex-1" size="lg">
                   Back to appointments
                 </Button>
               )}

@@ -55,7 +55,7 @@ export default function Appointments() {
   const [selectedHospital, setSelectedHospital] = useState<number | null>(null);
 
   const handleBookAppointment = (hospital: Hospital) => {
-    navigate("/agent-call", { state: { hospital } });
+    navigate("/app/agent-call", { state: { hospital } });
   };
 
   const getAvailabilityBadge = (availability: Hospital["availability"]) => {

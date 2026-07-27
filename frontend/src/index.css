@@ -47,6 +47,11 @@ All colors MUST be HSL.
     --critical: 0 72% 51%;
     --critical-foreground: 0 0% 100%;
 
+    --landing-dark-bg: 160 30% 6%;
+    --landing-dark-card: 160 22% 14%;
+    --landing-glow-primary: 163 84% 45%;
+    --landing-glow-accent: 16 90% 65%;
+
     --shadow-sm: 0 1px 2px 0 rgba(16, 185, 129, 0.05);
     --shadow-md: 0 4px 6px -1px rgba(16, 185, 129, 0.08);
     --shadow-lg: 0 10px 15px -3px rgba(16, 185, 129, 0.1);
@@ -190,5 +195,38 @@ All colors MUST be HSL.
       background: rgba(255, 255, 255, 0.35);
       z-index: 20;
     }
+  }
+}
+
+@layer components {
+  .landing-orb {
+    position: absolute;
+    border-radius: 9999px;
+    filter: blur(70px);
+    opacity: 0.35;
+    pointer-events: none;
+    animation: landing-drift 18s ease-in-out infinite alternate;
+  }
+
+  .landing-glass-card {
+    background: hsl(var(--landing-dark-card) / 0.6);
+    border: 1px solid hsl(var(--landing-glow-primary) / 0.25);
+    backdrop-filter: blur(16px);
+    box-shadow: 0 0 40px -10px hsl(var(--landing-glow-primary) / 0.35);
+  }
+}
+
+@keyframes landing-drift {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  100% {
+    transform: translate(30px, -24px) scale(1.08);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-orb {
+    animation: none;
   }
 }

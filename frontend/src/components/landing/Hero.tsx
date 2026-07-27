@@ -25,7 +25,7 @@ export const Hero = () => {
           </span>
 
           <h1 className="mt-6 text-5xl font-bold leading-[1.05] tracking-tight text-foreground md:text-7xl">
-            Healthcare that notices <span className="text-primary">before you do.</span>
+            Someone's finally keeping track, <span className="text-primary">so you don't have to.</span>
           </h1>
 
           <p className="mt-6 max-w-lg text-lg leading-relaxed text-muted-foreground md:text-xl">

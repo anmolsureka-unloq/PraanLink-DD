@@ -106,7 +106,7 @@ export class GeminiLiveAPI {
 
   sendDefaultSetup() {
     const defaultConfig = {
-      model: "models/gemini-2.0-flash-exp",
+      model: import.meta.env.VITE_GEMINI_LIVE_MODEL || "models/gemini-2.5-flash-native-audio-preview-12-2025",
       generation_config: {
         response_modalities: ["audio"],
         speech_config: {

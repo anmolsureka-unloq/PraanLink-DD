@@ -79,7 +79,7 @@ IMPORTANT GUIDELINES:
 Begin by warmly greeting the user and asking them how their week has been health-wise.`;
 
     const customSetupConfig = {
-      model: "models/gemini-2.0-flash-exp",
+      model: import.meta.env.VITE_GEMINI_LIVE_MODEL || "models/gemini-2.5-flash-native-audio-preview-12-2025",
       system_instruction: {
         parts: [{
           text: systemInstruction

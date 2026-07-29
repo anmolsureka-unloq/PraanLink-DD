@@ -199,7 +199,7 @@ Remember: Your goal is to help them understand why health insurance is essential
 Begin by warmly greeting them and asking about their current insurance status and what brings them here today.`;
 
     const customSetupConfig = {
-      model: "models/gemini-2.0-flash-exp",
+      model: import.meta.env.VITE_GEMINI_LIVE_MODEL || "models/gemini-2.5-flash-native-audio-preview-12-2025",
       system_instruction: {
         parts: [{
           text: systemInstruction

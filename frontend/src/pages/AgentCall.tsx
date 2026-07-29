@@ -262,7 +262,7 @@ BEGINNING THE CALL:
 The person you're talking to is the hospital front desk staff. This is a real, live phone call conversation powered by Gemini Live API with real-time audio.${patientContextSection}`;
 
     const customSetupConfig = {
-      model: "models/gemini-2.0-flash-exp",
+      model: import.meta.env.VITE_GEMINI_LIVE_MODEL || "models/gemini-2.5-flash-native-audio-preview-12-2025",
       system_instruction: {
         parts: [{
           text: systemInstruction

@@ -10,48 +10,67 @@ import { motion, AnimatePresence } from "framer-motion";
 const POST_STOP_DELAY_MS = 15000;
 const SAMPLE_AUDIO_PATH = "/uploads/checkins/audio/checkin_1762026039554.wav";
 
+// A line's full text only appears once its utterance has actually finished
+// playing (audio.currentTime >= line.end) - never mid-sentence. This extra
+// beat after that makes the reveal feel like a natural caption catching up
+// rather than snapping in instantly.
+const REVEAL_DELAY_SEC = 0.5;
+
 // The fixed sample recording's real WhisperX transcript (verbatim text and
 // timestamps), with speaker turns attributed by conversational content -
 // the source diarization only produced a single speaker label, but who's
 // asking questions vs. answering with symptoms is unambiguous from the text.
 interface TranscriptLine {
   start: number;
+  end: number;
   text: string;
   role: "agent" | "patient";
 }
 
 const SAMPLE_TRANSCRIPT: TranscriptLine[] = [
-  { start: 1.229, text: "Hello.", role: "agent" },
-  { start: 6.437, text: "Hi there.", role: "agent" },
-  { start: 7.198, text: "How has your week been, health-wise?", role: "agent" },
-  { start: 9.762, text: "Anything in particular you'd like to discuss today?", role: "agent" },
-  { start: 13.989, text: "Nothing.", role: "patient" },
-  { start: 19.397, text: "Okay.", role: "agent" },
+  { start: 1.229, end: 1.89, text: "Hello.", role: "agent" },
+  { start: 6.437, end: 6.898, text: "Hi there.", role: "agent" },
+  { start: 7.198, end: 8.921, text: "How has your week been, health-wise?", role: "agent" },
+  { start: 9.762, end: 12.106, text: "Anything in particular you'd like to discuss today?", role: "agent" },
+  { start: 13.989, end: 14.53, text: "Nothing.", role: "patient" },
+  { start: 19.397, end: 19.778, text: "Okay.", role: "agent" },
   {
     start: 19.938,
+    end: 24.826,
     text: "Has there been anything at all that you've noticed about your physical or mental well-being this week?",
     role: "agent",
   },
-  { start: 25.126, text: "Maybe any changes in your mood, sleep, energy levels, or anything else?", role: "agent" },
-  { start: 29.933, text: "My hand is itching continuously.", role: "patient" },
-  { start: 38.286, text: "I see.", role: "agent" },
-  { start: 38.947, text: "You mentioned your hand is itching continuously.", role: "agent" },
-  { start: 41.231, text: "That must be quite irritating.", role: "agent" },
-  { start: 43.495, text: "Is there a specific area of your hand that's itching?", role: "agent" },
-  { start: 46.519, text: "Or is it all over?", role: "agent" },
-  { start: 48.503, text: "Just between my fingers.", role: "patient" },
-  { start: 50.105, text: "And I also have a cold.", role: "patient" },
-  { start: 57.473, text: "Okay, itching between your fingers and a cold.", role: "agent" },
-  { start: 61.017, text: "That's good to know.", role: "agent" },
-  { start: 61.918, text: "I'm sorry to hear that you're dealing with both of those things.", role: "agent" },
-  { start: 64.741, text: "Let's start with the itching.", role: "agent" },
+  {
+    start: 25.126,
+    end: 29.413,
+    text: "Maybe any changes in your mood, sleep, energy levels, or anything else?",
+    role: "agent",
+  },
+  { start: 29.933, end: 31.816, text: "My hand is itching continuously.", role: "patient" },
+  { start: 38.286, end: 38.627, text: "I see.", role: "agent" },
+  { start: 38.947, end: 41.171, text: "You mentioned your hand is itching continuously.", role: "agent" },
+  { start: 41.231, end: 43.194, text: "That must be quite irritating.", role: "agent" },
+  { start: 43.495, end: 45.838, text: "Is there a specific area of your hand that's itching?", role: "agent" },
+  { start: 46.519, end: 47.321, text: "Or is it all over?", role: "agent" },
+  { start: 48.503, end: 49.825, text: "Just between my fingers.", role: "patient" },
+  { start: 50.105, end: 51.908, text: "And I also have a cold.", role: "patient" },
+  { start: 57.473, end: 60.316, text: "Okay, itching between your fingers and a cold.", role: "agent" },
+  { start: 61.017, end: 61.738, text: "That's good to know.", role: "agent" },
+  {
+    start: 61.918,
+    end: 64.461,
+    text: "I'm sorry to hear that you're dealing with both of those things.",
+    role: "agent",
+  },
+  { start: 64.741, end: 66.182, text: "Let's start with the itching.", role: "agent" },
   {
     start: 66.623,
+    end: 72.589,
     text: "Since it's between your fingers, I'm wondering if we should check your user history for any past skin conditions or allergies.",
     role: "agent",
   },
-  { start: 73.33, text: "Would you like me to do that?", role: "agent" },
-  { start: 75.613, text: "Okay.", role: "patient" },
+  { start: 73.33, end: 74.451, text: "Would you like me to do that?", role: "agent" },
+  { start: 75.613, end: 80.578, text: "Okay.", role: "patient" },
 ];
 
 type Phase = "idle" | "recording" | "waiting" | "processing";
@@ -73,6 +92,7 @@ export default function CheckIn() {
   const [phase, setPhase] = useState<Phase>("idle");
   const [elapsed, setElapsed] = useState(0);
   const [visibleCount, setVisibleCount] = useState(0);
+  const [activeIndex, setActiveIndex] = useState(-1);
   const [result, setResult] = useState<CheckInSummary | null>(null);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -99,7 +119,7 @@ export default function CheckIn() {
 
   useEffect(() => {
     transcriptEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
-  }, [visibleCount]);
+  }, [visibleCount, activeIndex]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -119,14 +139,28 @@ export default function CheckIn() {
     setResult(null);
     setElapsed(0);
     setVisibleCount(0);
+    setActiveIndex(-1);
 
     const audio = new Audio(`${BACKEND_URL}${SAMPLE_AUDIO_PATH}`);
     audio.addEventListener("timeupdate", () => {
       const currentTime = audio.currentTime;
-      setVisibleCount((prev) => {
-        const nextCount = SAMPLE_TRANSCRIPT.filter((line) => line.start <= currentTime).length;
-        return nextCount > prev ? nextCount : prev;
-      });
+
+      // A line only becomes "complete" (full text revealed) once it has
+      // actually finished playing, plus a small buffer - never while it's
+      // still being spoken.
+      let completed = 0;
+      let inProgress = -1;
+      for (let i = 0; i < SAMPLE_TRANSCRIPT.length; i++) {
+        const line = SAMPLE_TRANSCRIPT[i];
+        if (currentTime >= line.end + REVEAL_DELAY_SEC) {
+          completed = i + 1;
+        } else if (currentTime >= line.start) {
+          inProgress = i;
+        }
+      }
+
+      setVisibleCount((prev) => (completed > prev ? completed : prev));
+      setActiveIndex(inProgress >= completed ? inProgress : -1);
     });
     audioRef.current = audio;
     audio.play().catch((error) => console.error("Audio playback error:", error));
@@ -140,6 +174,7 @@ export default function CheckIn() {
 
     audioRef.current?.pause();
     stopElapsedTimer();
+    setActiveIndex(-1);
     setPhase("waiting");
     completionTimerRef.current = setTimeout(finalizeCheckIn, POST_STOP_DELAY_MS);
   };
@@ -177,7 +212,7 @@ export default function CheckIn() {
 
   const isRecording = phase === "recording";
   const isBusy = phase === "waiting" || phase === "processing";
-  const showTranscript = (phase === "recording" || phase === "waiting") && visibleCount > 0;
+  const showTranscript = (phase === "recording" || phase === "waiting") && (visibleCount > 0 || activeIndex >= 0);
 
   return (
     <div className="px-5 py-6">
@@ -294,6 +329,50 @@ export default function CheckIn() {
                     </div>
                   </motion.div>
                 ))}
+                {activeIndex >= 0 && (
+                  <motion.div
+                    key="typing"
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    className={cn(
+                      "flex items-end gap-2",
+                      SAMPLE_TRANSCRIPT[activeIndex].role === "patient" && "flex-row-reverse"
+                    )}
+                  >
+                    <div
+                      className={cn(
+                        "flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full",
+                        SAMPLE_TRANSCRIPT[activeIndex].role === "agent"
+                          ? "bg-primary/15 text-primary"
+                          : "bg-secondary/20 text-secondary"
+                      )}
+                    >
+                      {SAMPLE_TRANSCRIPT[activeIndex].role === "agent" ? (
+                        <Bot className="h-4 w-4" />
+                      ) : (
+                        <User className="h-4 w-4" />
+                      )}
+                    </div>
+                    <div
+                      className={cn(
+                        "flex items-center gap-1 rounded-2xl px-3 py-2.5",
+                        SAMPLE_TRANSCRIPT[activeIndex].role === "agent"
+                          ? "rounded-bl-sm bg-muted"
+                          : "rounded-br-sm bg-primary/20"
+                      )}
+                    >
+                      {[0, 1, 2].map((dot) => (
+                        <motion.span
+                          key={dot}
+                          className="h-1.5 w-1.5 rounded-full bg-muted-foreground/60"
+                          animate={{ opacity: [0.3, 1, 0.3] }}
+                          transition={{ repeat: Infinity, duration: 1, delay: dot * 0.15 }}
+                        />
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
               </AnimatePresence>
               <div ref={transcriptEndRef} />
             </div>

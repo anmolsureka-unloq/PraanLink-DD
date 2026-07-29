@@ -241,6 +241,10 @@ export default function CheckIn() {
                 <h3 className="text-subtitle text-foreground">Check-in results</h3>
               </div>
 
+              {result.date && (
+                <p className="text-caption text-muted-foreground">Mentioned date: {result.date}</p>
+              )}
+
               {result.summary && <p className="text-body text-muted-foreground">{result.summary}</p>}
 
               {result.overall_score && (
@@ -250,10 +254,38 @@ export default function CheckIn() {
                 </p>
               )}
 
+              {result.mood && (
+                <p className="text-body">
+                  <span className="font-medium text-foreground">Mood: </span>
+                  {result.mood}
+                </p>
+              )}
+
+              {result.sleep_quality && (
+                <p className="text-body">
+                  <span className="font-medium text-foreground">Sleep quality: </span>
+                  {result.sleep_quality}
+                </p>
+              )}
+
+              {result.energy_level && (
+                <p className="text-body">
+                  <span className="font-medium text-foreground">Energy level: </span>
+                  {result.energy_level}
+                </p>
+              )}
+
               {!!result.symptoms?.length && (
                 <p className="text-body">
                   <span className="font-medium text-foreground">Symptoms: </span>
                   {result.symptoms.join(", ")}
+                </p>
+              )}
+
+              {!!result.medications_taken?.length && (
+                <p className="text-body">
+                  <span className="font-medium text-foreground">Medications taken: </span>
+                  {result.medications_taken.join(", ")}
                 </p>
               )}
 

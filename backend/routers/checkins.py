@@ -56,7 +56,11 @@ def get_checkin_summaries(
                 # Safely parse each field
                 symptoms = safe_parse_json(checkin.symptoms, [])
                 medications = safe_parse_json(checkin.medications_taken, [])
-                concerns = safe_parse_json(checkin.concerns, [])
+                # concerns is a plain string field (see ConversationSummary
+                # schema), not a JSON array - safe_parse_json would try to
+                # re-parse it as JSON and silently drop it to [] for any
+                # real sentence.
+                concerns = checkin.concerns if isinstance(checkin.concerns, str) else (checkin.concerns or "")
                 ai_insights = safe_parse_json(checkin.ai_insights, [])
                 
                 # Handle summary - it might be a dict or string
@@ -120,7 +124,10 @@ def get_checkin_detail(
         # Safely parse JSON fields
         symptoms = safe_parse_json(checkin.symptoms, [])
         medications = safe_parse_json(checkin.medications_taken, [])
-        concerns = safe_parse_json(checkin.concerns, [])
+        # concerns is a plain string field (see ConversationSummary schema),
+        # not a JSON array - safe_parse_json would try to re-parse it as
+        # JSON and silently drop it to [] for any real sentence.
+        concerns = checkin.concerns if isinstance(checkin.concerns, str) else (checkin.concerns or "")
         ai_insights = safe_parse_json(checkin.ai_insights, [])
         transcript = safe_parse_json(checkin.transcript, {})
         

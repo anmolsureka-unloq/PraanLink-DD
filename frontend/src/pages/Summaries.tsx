@@ -10,13 +10,14 @@ import { motion } from "framer-motion";
 interface CheckInSummary {
   id: number;
   timestamp: string;
+  date?: string | null;
   summary: string;
   mood: string;
   symptoms: string[];
   medications_taken: string[];
   sleep_quality: string;
   energy_level: string;
-  concerns: string[];
+  concerns: string;
   ai_insights: string[];
   overall_score: string;
 }
@@ -312,6 +313,9 @@ export default function Summaries() {
                             <Calendar className="h-5 w-5 text-primary" />
                             <h3 className="text-subtitle text-foreground">{formatDate(checkIn.timestamp)}</h3>
                           </div>
+                          {checkIn.date && (
+                            <p className="mt-0.5 text-caption text-muted-foreground">Mentioned date: {checkIn.date}</p>
+                          )}
                           {checkIn.overall_score && (
                             <p className={`mt-1 text-caption font-medium ${getScoreColor(checkIn.overall_score)}`}>
                               Health score: {checkIn.overall_score}
@@ -328,6 +332,16 @@ export default function Summaries() {
                       {checkIn.summary && (
                         <div className="mb-3 rounded-lg bg-muted/50 p-3">
                           <p className="text-body leading-relaxed text-foreground">{checkIn.summary}</p>
+                        </div>
+                      )}
+
+                      {checkIn.concerns && (
+                        <div className="mb-3 rounded-lg bg-warning/10 p-3">
+                          <h4 className="mb-1 flex items-center gap-2 text-caption font-medium text-foreground">
+                            <AlertCircle className="h-4 w-4 text-warning" />
+                            Concerns
+                          </h4>
+                          <p className="text-body text-foreground">{checkIn.concerns}</p>
                         </div>
                       )}
 

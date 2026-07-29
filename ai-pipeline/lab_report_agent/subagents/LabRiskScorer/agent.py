@@ -6,7 +6,7 @@ from lab_report_agent.models import LabRiskScores  # define this schema in model
 
 lab_risk_scorer_agent = LlmAgent(
     name="lab_risk_scorer_agent",
-    model="gemini-2.5-flash",
+    model="gemini-flash-latest",
     description="Quantifies patient health risks based on analyzed lab data, computes risk scores per health category, and provides overall health severity assessment.",
     instruction=LAB_RISK_SCORER_INSTRUCTION,
     generate_content_config=types.GenerateContentConfig(temperature=0.0),

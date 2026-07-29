@@ -6,7 +6,7 @@ from report_agent.models import Timeline  # You can define this in models.py as 
 
 timeline_builder_agent = LlmAgent(
     name="timeline_builder_agent",
-    model="gemini-2.5-flash",
+    model="gemini-flash-latest",
     description="Builds or updates a chronological medical timeline for the patient using conversation transcripts and lab data.",
     instruction=TIMELINE_BUILDER_INSTRUCTION,
     generate_content_config=types.GenerateContentConfig(temperature=0.0),

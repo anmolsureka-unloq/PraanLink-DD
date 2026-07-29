@@ -6,7 +6,7 @@ from report_agent.models import PatientHealthReport
 
 report_aggregator_agent = LlmAgent(
     name="report_aggregator_agent",
-    model="gemini-2.5-flash",
+    model="gemini-flash-latest",
     description="Aggregates outputs from all previous patient health report analysis sub-agents into a final comprehensive PatientHealthReport.",
     instruction=REPORT_AGGREGATOR_INSTRUCTION,
     generate_content_config=types.GenerateContentConfig(temperature=0.0),

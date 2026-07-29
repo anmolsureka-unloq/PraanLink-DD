@@ -6,7 +6,7 @@ from report_agent.models import ClinicalTrends
 
 clinical_trend_analyzer_agent = LlmAgent(
     name="clinical_trend_analyzer_agent",
-    model="gemini-2.5-flash",
+    model="gemini-flash-latest",
     description="Analyzes lab reports to detect clinical trends, flag abnormalities, and summarize changes in patient metrics.",
     instruction=CLINICAL_TREND_ANALYZER_INSTRUCTION,
     generate_content_config=types.GenerateContentConfig(temperature=0.0),

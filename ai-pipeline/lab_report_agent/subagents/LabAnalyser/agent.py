@@ -6,7 +6,7 @@ from lab_report_agent.models import LabAnalysis  # define this schema in your mo
 
 lab_analyzer_agent = LlmAgent(
     name="lab_analyzer_agent",
-    model="gemini-2.5-flash",
+    model="gemini-flash-latest",
     description="Analyzes structured lab report data to detect abnormal values, classify results, and identify correlated clinical patterns.",
     instruction=LAB_ANALYZER_INSTRUCTION,
     generate_content_config=types.GenerateContentConfig(temperature=0.0),

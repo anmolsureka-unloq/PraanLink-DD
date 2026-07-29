@@ -6,7 +6,7 @@ from report_agent.models import RiskAndSeverity  # Define this in models.py as a
 
 risk_and_severity_agent = LlmAgent(
     name="risk_and_severity_agent",
-    model="gemini-2.5-flash",
+    model="gemini-flash-latest",
     description="Calculates disease-specific risk scores, overall health index, and assigns severity levels.",
     instruction=RISK_AND_SEVERITY_INSTRUCTION,
     generate_content_config=types.GenerateContentConfig(temperature=0.0),

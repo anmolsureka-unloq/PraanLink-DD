@@ -6,7 +6,7 @@ from report_agent.models import PossibleConditions  # Define this in models.py a
 
 disease_inference_agent = LlmAgent(
     name="disease_inference_agent",
-    model="gemini-2.5-flash",
+    model="gemini-flash-latest",
     description="Infers possible diseases or conditions from clinical context and suggests next diagnostic steps.",
     instruction=DISEASE_INFERENCE_INSTRUCTION,
     generate_content_config=types.GenerateContentConfig(temperature=0.0),

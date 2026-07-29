@@ -38,7 +38,7 @@ def prep_image(image_path: str, display_name: str = "UploadedImage"):
         raise
 
 
-def extract_text_from_image(uploaded_file, model_name: str = "gemini-2.5-flash"):
+def extract_text_from_image(uploaded_file, model_name: str = "gemini-flash-latest"):
     """
     Call Gemini to extract text verbatim from the uploaded image.
     Returns the extracted text as a string.

@@ -1,6 +1,7 @@
 import subprocess
 import json
 import os
+import sys
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -29,7 +30,7 @@ def transcribe_audio(file_path: str, output_dir: str = "uploads/transcripts"):
         )
 
     cmd = [
-        "whisperx",
+        sys.executable, "-m", "whisperx",
         file_path,
         "--model", "medium",
         "--output_dir", output_dir,

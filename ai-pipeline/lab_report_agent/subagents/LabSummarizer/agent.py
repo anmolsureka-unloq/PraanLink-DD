@@ -6,7 +6,7 @@ from lab_report_agent.models import LabSummary  # define this schema in models.p
 
 lab_summary_agent = LlmAgent(
     name="lab_summary_agent",
-    model="gemini-2.5-flash",
+    model="gemini-flash-latest",
     description="Generates an interpretive lab summary and health recommendations based on parsed values, analysis insights, and quantified risk scores.",
     instruction=LAB_SUMMARY_INSTRUCTION,
     generate_content_config=types.GenerateContentConfig(temperature=0.2),

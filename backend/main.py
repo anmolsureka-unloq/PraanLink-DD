@@ -7,6 +7,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 from marshmallow import ValidationError as MarshmallowValidationError
 import os
+import json
 from contextlib import asynccontextmanager
 from routers import checkins, prescriptions, reports, hospitals, insurances, appointments
 from db.database import init_db, SessionLocal
@@ -415,6 +416,106 @@ async def upload_insurance_consultation(
         )
 
 
+# --- Demo/simulation endpoints -----------------------------------------
+# These skip live recording + WhisperX transcription (unreliable in this
+# environment) and run the real downstream agent pipeline against a fixed
+# pre-existing sample transcript, so the rest of the app can be exercised
+# end-to-end without depending on WhisperX or a live Gemini voice call.
+
+SAMPLE_CHECKIN_AUDIO_PATH = "checkins/audio/checkin_1762026039554.wav"
+SAMPLE_CHECKIN_TRANSCRIPT_PATH = "uploads/checkins/transcripts/checkin_1762026039554.json"
+
+SAMPLE_INSURANCE_AUDIO_PATH = "insurance/audio/insurance_consultation_1762014948207.wav"
+SAMPLE_INSURANCE_TRANSCRIPT_PATH = "uploads/insurance/transcripts/insurance_consultation_1762014948207.json"
+
+
+@app.post("/simulate-checkin")
+async def simulate_checkin(db: Session = Depends(get_db)):
+    """
+    Run the real check-in summarization agent against a fixed sample
+    transcript (no audio upload, no WhisperX transcription), and save the
+    result as a normal CheckIn row - same as /upload-checkin from Step 2 on.
+    """
+    try:
+        if not os.path.exists(SAMPLE_CHECKIN_TRANSCRIPT_PATH):
+            return JSONResponse(
+                status_code=404,
+                content={"error": "Sample transcript not found", "path": SAMPLE_CHECKIN_TRANSCRIPT_PATH}
+            )
+
+        with open(SAMPLE_CHECKIN_TRANSCRIPT_PATH, "r", encoding="utf-8") as f:
+            transcript = json.load(f)
+
+        print("Summarizing sample check-in transcript...")
+        summary = summarize_checkin_text(transcript)
+        inner_summary = summary.get("summary", {}) if summary else {}
+
+        checkin = CheckIn(
+            audio_path=f"uploads/{SAMPLE_CHECKIN_AUDIO_PATH}",
+            transcript=transcript,
+            summary=inner_summary.get("summary", ""),
+            mood=inner_summary.get("mood", ""),
+            symptoms=inner_summary.get("symptoms", []),
+            medications_taken=inner_summary.get("medications_taken", []),
+            sleep_quality=inner_summary.get("sleep_quality", ""),
+            energy_level=inner_summary.get("energy_level", ""),
+            concerns=inner_summary.get("concerns", ""),
+            ai_insights=inner_summary.get("ai_insights", []),
+            overall_score=inner_summary.get("overall_score", "")
+        )
+
+        db.add(checkin)
+        db.commit()
+        db.refresh(checkin)
+
+        return {
+            "id": checkin.id,
+            "message": "Simulated check-in stored successfully",
+            "transcript": transcript,
+            "summary": summary,
+            "audio_url": f"/uploads/{SAMPLE_CHECKIN_AUDIO_PATH}"
+        }
+
+    except Exception as e:
+        print(f"Error processing simulated check-in: {str(e)}")
+        return JSONResponse(
+            status_code=500,
+            content={"error": "Processing failed", "message": str(e), "id": None}
+        )
+
+
+@app.post("/simulate-insurance-consultation")
+async def simulate_insurance_consultation():
+    """
+    Return a fixed sample insurance-consultation transcript (no audio
+    upload, no WhisperX transcription) - mirrors what
+    /upload-insurance-consultation returns after transcription.
+    """
+    try:
+        if not os.path.exists(SAMPLE_INSURANCE_TRANSCRIPT_PATH):
+            return JSONResponse(
+                status_code=404,
+                content={"error": "Sample transcript not found", "path": SAMPLE_INSURANCE_TRANSCRIPT_PATH}
+            )
+
+        with open(SAMPLE_INSURANCE_TRANSCRIPT_PATH, "r", encoding="utf-8") as f:
+            transcript = json.load(f)
+
+        return {
+            "message": "Simulated consultation loaded successfully",
+            "file_path": f"uploads/{SAMPLE_INSURANCE_AUDIO_PATH}",
+            "audio_url": f"/uploads/{SAMPLE_INSURANCE_AUDIO_PATH}",
+            "transcript": transcript
+        }
+
+    except Exception as e:
+        print(f"Error processing simulated insurance consultation: {str(e)}")
+        return JSONResponse(
+            status_code=500,
+            content={"error": "Processing failed", "message": str(e)}
+        )
+
+
 class SearchQuery(BaseModel):
     query: str
 
@@ -424,7 +525,7 @@ class SearchQuery(BaseModel):
 @app.post("/medical-search")
 async def medical_search(payload: SearchQuery):
     try:
-        model = genai.GenerativeModel(model_name="gemini-2.5-flash")
+        model = genai.GenerativeModel(model_name="gemini-flash-latest")
         prompt = (
             "You are a medical information assistant. Answer the following health-related "
             "question with clear, accurate, general medical knowledge in 3-5 sentences. "

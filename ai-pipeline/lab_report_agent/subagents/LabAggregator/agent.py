@@ -6,7 +6,7 @@ from lab_report_agent.models import FinalLabReport
 
 lab_aggregator_agent = LlmAgent(
     name="lab_aggregator_agent",
-    model="gemini-2.5-flash",
+    model="gemini-flash-latest",
     description="Aggregates outputs from all previous lab report analysis sub-agents into a final comprehensive report.",
     instruction=LAB_AGGREGATOR_INSTRUCTION,
     generate_content_config=types.GenerateContentConfig(temperature=0.0),

@@ -6,7 +6,7 @@ from report_agent.models import FinalReport
 
 patient_report_generator_agent = LlmAgent(
     name="patient_report_generator_agent",
-    model="gemini-2.5-flash",
+    model="gemini-flash-latest",
     description="Generates comprehensive patient health reports by synthesizing timeline, clinical trends, risk assessments, possible conditions, and medication overview into actionable insights.",
     instruction=PATIENT_REPORT_GENERATOR_INSTRUCTION,
     generate_content_config=types.GenerateContentConfig(temperature=0.2),

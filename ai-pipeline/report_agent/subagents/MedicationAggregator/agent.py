@@ -6,7 +6,7 @@ from report_agent.models import MedicationOverview
 
 medication_aggregator_agent = LlmAgent(
     name="medication_aggregator_agent",
-    model="gemini-2.5-flash",
+    model="gemini-flash-latest",
     description="Aggregates medication information from prescriptions and conversation summaries, prioritizing recent data and creating a comprehensive medication overview.",
     instruction=MEDICATION_AGGREGATOR_INSTRUCTION,
     generate_content_config=types.GenerateContentConfig(temperature=0.0),

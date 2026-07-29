@@ -6,7 +6,7 @@ from prescription_agent.models import PrescriptionData  # define this schema in 
 
 prescription_agent = LlmAgent(
     name="prescription_agent",
-    model="gemini-2.5-flash",
+    model="gemini-flash-latest",
     description=(
         "Extracts structured prescription information from raw OCR text, including "
         "doctor details, patient information, prescribed medicines, and clinical summary."

@@ -1,12 +1,14 @@
-import { useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
+import { useEffect, useRef, useState } from "react";
 import { Card } from "@/components/ui/card";
-import { CheckCircle2, Loader2, Mic, Pause, Play, Square } from "lucide-react";
+import { CheckCircle2, Loader2, Mic, Pause, Play } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 
-const MIN_CHECKIN_SECONDS = 15;
+// How long a pause has to "stick" (no resume) before the check-in is
+// finalized. Purely internal timing - never shown to the user as a
+// countdown or a blocking gate.
+const POST_PAUSE_DELAY_MS = 15000;
 const SAMPLE_AUDIO_PATH = "/uploads/checkins/audio/checkin_1762026039554.wav";
 
 interface CheckInSummary {
@@ -30,23 +32,38 @@ export default function CheckIn() {
   const [result, setResult] = useState<CheckInSummary | null>(null);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const elapsedTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const completionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const BACKEND_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
-  const stopTimer = () => {
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-      timerRef.current = null;
+  const stopElapsedTimer = () => {
+    if (elapsedTimerRef.current) {
+      clearInterval(elapsedTimerRef.current);
+      elapsedTimerRef.current = null;
     }
   };
 
-  const startTimer = () => {
-    stopTimer();
-    timerRef.current = setInterval(() => {
+  const startElapsedTimer = () => {
+    stopElapsedTimer();
+    elapsedTimerRef.current = setInterval(() => {
       setElapsed((prev) => prev + 1);
     }, 1000);
   };
+
+  const clearCompletionTimer = () => {
+    if (completionTimerRef.current) {
+      clearTimeout(completionTimerRef.current);
+      completionTimerRef.current = null;
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      stopElapsedTimer();
+      clearCompletionTimer();
+    };
+  }, []);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -54,42 +71,38 @@ export default function CheckIn() {
     return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   };
 
-  // Starts (or pauses/resumes) playback of a fixed sample recording. However
-  // many times this is paused and resumed, the check-in that gets saved on
-  // Stop always uses the same complete pre-existing transcript below - the
-  // agentic pipeline never sees a partial one.
+  // Start -> play the complete sample recording. Pause -> pauses playback
+  // right there and arms a 15s completion timer. Tapping again before that
+  // timer fires resumes playback and cancels it - however many times this
+  // happens, finalizeCheckIn() below always submits the same complete
+  // pre-existing transcript, never a partial one.
   const handleMicClick = () => {
     if (!isRecording) {
       setResult(null);
       setElapsed(0);
 
       const audio = new Audio(`${BACKEND_URL}${SAMPLE_AUDIO_PATH}`);
-      audio.loop = true;
       audioRef.current = audio;
       audio.play().catch((error) => console.error("Audio playback error:", error));
 
       setIsRecording(true);
       setIsPaused(false);
-      startTimer();
-      toast.success("Check-in started");
+      startElapsedTimer();
     } else if (!isPaused) {
       audioRef.current?.pause();
-      stopTimer();
+      stopElapsedTimer();
       setIsPaused(true);
+      completionTimerRef.current = setTimeout(finalizeCheckIn, POST_PAUSE_DELAY_MS);
     } else {
+      clearCompletionTimer();
       audioRef.current?.play().catch((error) => console.error("Audio playback error:", error));
-      startTimer();
+      startElapsedTimer();
       setIsPaused(false);
     }
   };
 
-  const handleStop = async () => {
-    if (elapsed < MIN_CHECKIN_SECONDS) {
-      toast.error(`Keep going a little longer - check in for at least ${MIN_CHECKIN_SECONDS} seconds.`);
-      return;
-    }
-
-    stopTimer();
+  const finalizeCheckIn = async () => {
+    completionTimerRef.current = null;
     audioRef.current?.pause();
     audioRef.current = null;
     setIsRecording(false);
@@ -119,8 +132,6 @@ export default function CheckIn() {
     }
   };
 
-  const canStop = elapsed >= MIN_CHECKIN_SECONDS;
-
   return (
     <div className="px-5 py-6">
       <div className="mx-auto max-w-md space-y-5">
@@ -131,11 +142,6 @@ export default function CheckIn() {
             {isRecording && (
               <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="text-center">
                 <div className="text-display text-foreground">{formatTime(elapsed)}</div>
-                {!canStop && (
-                  <p className="mt-1 text-caption text-muted-foreground">
-                    {MIN_CHECKIN_SECONDS - elapsed}s until you can save
-                  </p>
-                )}
               </motion.div>
             )}
 
@@ -203,19 +209,6 @@ export default function CheckIn() {
                   : "Tap to start your check-in"}
               </p>
             </div>
-
-            {/* Stop & Save */}
-            {isRecording && (
-              <Button
-                variant={canStop ? "default" : "outline"}
-                className="w-full"
-                onClick={handleStop}
-                disabled={isProcessing}
-              >
-                <Square className="h-4 w-4" />
-                {canStop ? "Stop & save check-in" : `Stop & save (available at ${MIN_CHECKIN_SECONDS}s)`}
-              </Button>
-            )}
           </div>
         </Card>
 
